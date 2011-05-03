@@ -67,7 +67,7 @@
 					$("#remove").attr("ruleid", ruleId);
 					
 					if (!customPrefs) {
-						$("#use-default")[0].checked = true;
+						$("#use-default").each(function () { this.checked = true; });
 					}
 					else {
 						$("#use-default").removeAttr("checked");
