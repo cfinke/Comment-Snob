@@ -1,0 +1,17 @@
+{
+	"id" : "chrisfinke@chrisfinke.com",
+	"label" : "ChrisFinke.com",
+	"url" : "^http://www\\.chrisfinke\\.com/",
+	"allCommentsSelector" : "#comments",
+	"commentContainerSelector" : ".commentlist > li",
+	"commentTextSelector" : "div[rel='comment']",
+	"commentHideSelector" : ".commentmetadata, div[rel='comment']",
+	"statusElementTag" : "span",
+	"statusContainerSelector" : "> .comment-header",
+	"statusPlacement" : "append",
+	"statusElementAttributes" : {
+		"style" : "margin-left: 10px; color: #aaa;"
+	},
+	"updateURL" : "http://www.chrisfinke.com/comment-snob/rules/chrisfinke.snob"
+}
+	

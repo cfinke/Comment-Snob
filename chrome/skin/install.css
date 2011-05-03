@@ -1,0 +1,69 @@
+.comment-snob-infobar table {
+	font-family: inherit !important;
+	font-size: inherit !important;
+	font-weight: inherit !important;
+	color: inherit !important;
+}
+
+.comment-snob-infobar {
+	font-family: Helvetica, sans-serif !important;
+	font-size: 12px !important;
+	font-weight: bold !important;
+}
+
+.comment-snob-infobar {
+	position: fixed !important;
+	top: 0 !important;
+	left: 0 !important;
+	height: 14px !important;
+	width: 100% !important;
+	padding: 5px 0 9px 0 !important;
+	margin: auto !important;
+	background: -webkit-linear-gradient(#ffde5a, #ffc43c) !important;
+	border-bottom: 1px solid #c48826 !important;
+	border-top: 1px solid #ffe67f !important;
+}
+
+.comment-snob-infobar button {
+	margin-left: 10px !important;
+	position: relative !important;
+	top: -5px !important;
+}
+
+.comment-snob-infobar table {
+	width: 100% !important;
+	border: 0 !important;
+	border-collapse: 0 !important;
+	margin: 0 !important;
+	padding: 0 !important;
+}
+
+.comment-snob-infobar td {
+	padding: 0 !important;
+	vertical-align: top !important;
+}
+
+.comment-snob-infobar table td:last-child {
+	text-align: right !important;
+}
+
+.comment-snob-infobar table td:first-child {
+	padding-left: 5px !important;
+}
+
+.comment-snob-success-bar {
+	background: -webkit-linear-gradient(#ffde5a, #ffc43c) !important;
+	border-bottom: 1px solid #c48826 !important;
+	border-top: 1px solid #ffe67f !important;
+}
+
+.comment-snob-error-bar {
+	background: -webkit-linear-gradient(#626262, #414141) !important;
+	border-bottom: 1px solid #535353 !important;
+	border-top: 1px solid #6c6c6c !important;
+	color: #fff !important;
+}
+
+.comment-snob-infobar img {
+	border: 0 !important;
+}

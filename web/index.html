@@ -1,0 +1,123 @@
+<html>
+	<head>
+		<title>Comment Snob</title>
+		<link rel="comment-snob-rule" title="chrisfinke.com" href="http://www.chrisfinke.com/comment-snob/rules/chrisfinke.snob" />
+		<link rel="comment-snob-rule" title="YouTube" href="http://www.chrisfinke.com/comment-snob/rules/youtube.snob" />
+		<link rel="comment-snob-rule" title="Hacker News" href="http://www.chrisfinke.com/comment-snob/rules/hn.snob" />
+		<link rel="stylesheet" type="text/css" href="/firstrun/firstrun.css" />
+		<style type="text/css">
+			#rule-attributes-table th {
+				text-align: left;
+			}
+
+			#rule-attributes-table td:first-child {
+				font-family: monospace;
+			}
+			
+			#rule-attributes-table td {
+				padding: 6px;
+			}
+
+			#rule-attributes-table tr:nth-child(odd) { background-color:#eee; }
+			#rule-attributes-table tr:nth-child(even) { background-color:#fff; }
+			
+			#featured-rules li {
+				width: 45%;
+				float: left;
+			}
+		</style>
+	</head>
+	<body>
+		<div style="width: 60%; margin: auto; font-size: larger; line-height: 1.5;">
+		<h1>Comment Snob</h1>
+		<p>Comment Snob is an extension for Google Chrome that filters out undesirable comments from comment threads on the Web. You can <a href="https://chrome.google.com/webstore/detail/gfbnmebccmipejnnlcaenkhfhniaielg">install it here</a>.</p>
+		<table>
+			<tr>
+				<td>Before:</td>
+				<td>After:</td>
+			</tr>
+			<tr>
+				<td><img src="youtube-before.png" /></td>
+				<td><img src="youtube-after.png" /></td>
+			</tr>
+		</table>
+		<p>It comes with support for YouTube by default, but you can add support for many other sites by installing Comment Snob rules. For each rule that you install, you can choose from the following filtering parameters:</p>
+		<ul>
+			<li>All capital letters</li>
+			<li>No capital letters</li>
+			<li>Doesn't start with a capital letter</li>
+			<li>Excessive punctuation (!!!! ????)</li>
+			<li>Excessive capitalization</li>
+			<li>Profanity</li>
+		</ul>
+		<h2>Installing Comment Snob Rules</h2>
+		<p>There are two ways to install a comment snob rule:</p>
+		<ol>
+			<li>Click on a Comment Snob rule link in a webpage.  A bar will appear at the top of your browser allowing you to install the rule. (Try clicking this link: <a class="comment-snob-rule" href="http://www.chrisfinke.com/comment-snob/rules/mashable.snob">Comment Snob Rule for Mashable</a>)<br /><br /><img src="install.png" /><br /><br /></li>
+			<li>Or, open the Comment Snob options and write your own Comment Snob rule.<br /><br /><img src="add.png" /><br /></li>
+		</ol>
+		<h2>Featured Comment Snob Rules</h2>
+		<div>
+			<ul id="featured-rules">
+				<li><a class="comment-snob-rule" href="http://www.chrisfinke.com/comment-snob/rules/youtube.snob">YouTube</a></li>
+				<li><a class="comment-snob-rule" href="http://www.chrisfinke.com/comment-snob/rules/yahoo-news.snob">Yahoo! News</a></li>
+				<li><a class="comment-snob-rule" href="http://www.chrisfinke.com/comment-snob/rules/break.snob">Break.com</a></li>
+				<li><a class="comment-snob-rule" href="http://www.chrisfinke.com/comment-snob/rules/mashable.snob">Mashable</a></li>
+				<li><a class="comment-snob-rule" href="http://www.chrisfinke.com/comment-snob/rules/hn.snob">Hacker News</a></li>
+				<li><a class="comment-snob-rule" href="http://www.chrisfinke.com/comment-snob/rules/fark.snob">Fark</a></li>
+				<li><a class="comment-snob-rule" href="http://www.chrisfinke.com/comment-snob/rules/reddit.snob">Reddit</a></li>
+				<li><a class="comment-snob-rule" href="http://www.chrisfinke.com/comment-snob/rules/chrisfinke.snob">ChrisFinke.com</a></li>
+			</ul>
+			<br style="clear: both;" />
+		</div>
+		<h2 id="howto">Writing a Comment Snob Rule</h2>
+		<p>Are you familiar with HTML and jQuery? Then you can write Comment Snob rules for any website you want.</p>
+		<h3>Components of a Rule</h3>
+		<p>A Comment Snob rule is a JSON object that tells Comment Snob how to find comments on a website and where to place the "Show/Hide" toggle for each comment. These are the properties that each rule should (or can) have; all selectors should be written for consumption by jQuery:</p>
+		<table id="rule-attributes-table" cellspacing="0">
+			<thead>
+				<tr style="background-color: #fff;">
+					<th>Attribute</th>
+					<th>Required</th>
+					<th>Description</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr><td>id</td><td>Yes</td><td>A string that should be unique to your rule. This is used to make sure that the same rule is not installed multiple times.</td></tr>
+				<tr><td>label</td><td>Yes</td><td>A string that describes your rule to a user. It will usually be the name of the website that it filters.</td></tr>
+				<tr><td>url</td><td>Yes</td><td>A regular expression (encoded in a string) that describes the URLs for which your rule should be run.</td></tr>
+				<tr><td>allCommentsSelector</td><td>Yes</td><td>A selector that selects the smallest possible container that contains all of the comments for the page.</td></tr>
+				<tr><td>commentContainerSelector</td><td>Yes</td><td>A selector that selects the largest possible container that contains only a single comment, using <code>allCommentsSelector</code> as a starting point.</td></tr>
+				<tr><td>commentTextSelector</td><td>Optional</td><td>A selector that selects the smallest possible container that contains all of the text for a comment, using <code>commentContainerSelector</code>. If not specified, defaults to <code>commentContainerSelector</code>.</td></tr>
+				<tr><td>commentHideSelector</td><td>Optional</td><td>A selector that selects any nodes that should be hidden when a comment is filtered, using <code>commentContainerSelector</code> as a starting point. If not specified, <code>commentTextSelector</code> will be used.</td></tr>
+				<tr><td>statusElementTag</td><td>Optional</td><td>The HTML tag name that should be used to hold the "Show/Hide" toggle and the reason for filtering. If not specified, defaults to "span".</td></tr>
+				<tr><td>statusContainerSelector</td><td>Optional</td><td>A selector that selects the element that will be used as a point of reference for where the "show/hide" toggle and filtering reason is placed for each comment.  If not specified, defaults to <code>commentContainerSelector</code>.</td></tr>
+				<tr><td>statusPlacement</td><td>Optional</td><td>One of "prepend", "append", "before", or "after"; used along with statusContainerSelector to insert the filtering status into each filtered comment.  Defaults to "prepend".</td></tr>
+				<tr><td>statusElementAttributes</td><td>Optional</td><td>A hash containing name/value pairs for attributes that can be added to the placeholder element specified by <code>statusElementTag</code>.</td></tr>
+				<tr><td>ajaxInitiatorSelector</td><td>Optional</td><td>A selector that selects any UI elements that might be clicked to trigger loading more comments via AJAX, using <code>allCommentsSelector</code> as a starting point.</td></tr>
+				<tr><td>dynamic</td><td>Optional</td><td>A boolean value (defaults to false) that indicates whether the website's comments are not included in the main pageload, but are immediately loaded after the page loads. Disqus is the most common example of this.</td></tr>
+				<tr><td>updateURL</td><td>Optional</td><td>A URL where the JSON for this rule can be retrieved (for automatic updates).</td></tr>
+				<tr><td>author</td><td>Optional</td><td>Your name, email address, or website.</td></tr>
+				<tr><td>description</td><td>Optional</td><td>A text description of your rule, only recommended if the label doesn't fully describe the functionality.</td></tr>
+			</tbody>
+		</table>
+		<p>The simplest possible rule might look like this:</p>
+		<pre>{
+	"id": "test@example.com",
+	"label": "Example.com",
+	"url": "^http://example\\.com/",
+	"allCommentsSelector": "#comments",
+	"commentContainerSelector": ".comment"
+}</pre>
+		<h2>Rule Discovery</h2>
+		<p>To let users install your rule, just link to a file containing only the JSON, and give the <code>&lt;a&gt;</code> tag a "comment-snob-rule" class:</p>
+		<pre>&lt;a href="http://www.chrisfinke.com/comment-snob/rules/hn.snob" class="comment-snob-rule">Comment Filter for Hacker News&lt;/a></pre>
+		<p>(You could also include the JSON in the <code>href</code> attribute directly as a data URI.)</p>
+		<p>Users can also install rules by opening a JSON file whose filename ends in ".snob" directly in the browser.</p>
+		<h2>Questions?</h2>
+		<p>E-mail me at <a href="mailto:cfinke@gmail.com">cfinke@gmail.com</a>.</p>
+		</div>
+		<script src="http://www.google-analytics.com/urchin.js" type="text/javascript"></script>
+		<script type="text/javascript">_uacct = "UA-1433349-1";urchinTracker();</script>
+	</body>
+</html>

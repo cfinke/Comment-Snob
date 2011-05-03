@@ -1,0 +1,17 @@
+{
+	"id": "yahoo-news@chrisfinke.com",
+	"label": "Yahoo! News",
+	"url": "^http://news\\.yahoo\\.com/",
+	"allCommentsSelector": "#ygs-comments",
+	"commentContainerSelector": ".mwpphu-comment",
+		"commentTextSelector": ".mwpphu-commenttext",
+		"commentHideSelector": "> *",
+	"statusElementTag": "div",
+	"statusElementAttributes" : {
+		"class" : "mwpphu-negative-rating",
+		"style" : "width: 100%; margin-bottom: 10px;"
+	},
+	"statusPlacement": "prepend",
+	"ajaxInitiatorSelector" : ".comments-replies-showbtn, .comments-replies-showmorebtn",
+	"updateURL": "http://www.chrisfinke.com/comment-snob/rules/yahoo-news.snob"
+}

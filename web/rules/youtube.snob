@@ -1,0 +1,16 @@
+{
+	"id": "youtube@chrisfinke.com",
+	"label": "YouTube",
+	"url": "^http://www\\.youtube\\.com/.*$",
+	"allCommentsSelector": "#comments-view",
+	"commentContainerSelector": "li.comment",
+	"commentTextSelector": "div.comment-text",
+	"commentHideSelector": "> div",
+	"statusElementTag": "div",
+	"statusElementAttributes": {
+		"class": "content",
+		"style": "color: #666;"
+	},
+	"ajaxInitiatorSelector": ".comments-pagination button, .comments-pagination a, .comments-pagination button > span",
+	"updateURL": "http://www.chrisfinke.com/comment-snob/rules/youtube.snob"
+}

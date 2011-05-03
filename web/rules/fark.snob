@@ -1,0 +1,15 @@
+{
+	"id": "fark@chrisfinke.com",
+	"label": "Fark",
+	"url": "^http://www\\.fark\\.com/comments",
+	"allCommentsSelector": "#commentsHeader, #commentsArea, #commentsPostingArea, .refreshRedisplayComments",
+	"commentContainerSelector": ".ctext",
+	"statusElementTag": "div",
+	"statusElementAttributes" : {
+		"class" : "ctext",
+		"style" : "color: #666;",
+		"comment-snob-processed" : "true"
+	},
+	"statusPlacement": "before",
+	"updateURL": "http://www.chrisfinke.com/comment-snob/rules/fark.snob"
+}

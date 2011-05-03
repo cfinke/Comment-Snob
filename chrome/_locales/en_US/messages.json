@@ -1,0 +1,95 @@
+{
+	"extName": {
+		"message": "Comment Snob"
+	},
+	"extDescription": {
+		"message": "Filters out undesirable comments from the Web."
+	},
+	"action_save": {
+		"message": "Save"
+	},
+	"options_page_title": {
+		"message": "Comment Snob Options"
+	},
+	"label_site": {
+		"message": "Site:"
+	},
+	"label_hide_all": {
+		"message": "Hide all comments"
+	},
+	"label_hide_no_capital": {
+		"message": "Hide comments that have no capital letters."
+	},
+	"label_hide_only_capital": {
+		"message": "Hide comments that have only capital letters."
+	},
+	"label_hide_start_lower": {
+		"message": "Hide comments that do not start with a capital letter."
+	},
+	"label_hide_too_much_punctuation": {
+		"message": "Hide comments that have excessive punctuation. (!!!!! ?????)"
+	},
+	"label_hide_too_much_capitalization": {
+		"message": "Hide comments that have excessive capitalization."
+	},
+	"label_hide_too_much_profanity": {
+		"message": "Hide comments that include profanity."
+	},
+	"label_hide_spelling": {
+		"message": "Hide comments with at least this many spelling mistakes. (Set to zero to disable spellchecking.)"
+	},
+	"label_hidden_reason": {
+		"message": "Comment hidden ($reason$)",
+		"placeholders": {
+			"reason": {
+				"content": "$1"
+			}
+		}
+	},
+	"label_show": {
+		"message": "Show"
+	},
+	"label_hide": {
+		"message": "Hide"
+	},
+	"reason_no_capital": {
+		"message": "No capital letters",
+		"description": "A reason shown to the user when hiding a comment."
+	},
+	"reason_only_capital": {
+		"message": "All capital letters",
+		"description": "A reason shown to the user when hiding a comment."
+	},
+	"reason_start_lower": {
+		"message": "Doesn't start with a capital letter",
+		"description": "A reason shown to the user when hiding a comment."
+	},
+	"reason_too_much_punctuation": {
+		"message": "Excessive punctuation",
+		"description": "A reason shown to the user when hiding a comment."
+	},
+	"reason_too_much_capitalization": {
+		"message": "Excessive capitalization",
+		"description": "A reason shown to the user when hiding a comment."
+	},
+	"reason_too_much_profanity": {
+		"message": "Profanity",
+		"description": "A reason shown to the user when hiding a comment."
+	},
+	"reason_spelling": {
+		"message" : "Too many spelling mistakes",
+		"description": "A reason shown to the user when hiding a comment."
+	},
+	"option_default": {
+		"message": "(Default)"
+	},
+	"action_remove": {
+		"message": "Remove This Rule"
+	},
+	"action_add": {
+		"message": "Add a new rule"
+	},
+	"install_rule": {
+		"message": "Install a Comment Snob Rule from this page"
+	}
+}

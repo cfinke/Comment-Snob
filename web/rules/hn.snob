@@ -1,0 +1,17 @@
+{
+	"id": "hn@chrisfinke.com",
+	"label": "Hacker News",
+	"url": "^http://news\\.ycombinator\\.com/item",
+	"allCommentsSelector": "body > center:first > table:first > tbody:first > tr:eq(2) > td:first > table:eq(1)",
+	"commentContainerSelector": "> tbody > tr",
+			"commentTextSelector": "span.comment",
+			"commentHideSelector": "span.comment",
+	"statusContainerSelector": "td.default > div span.comhead",
+	"statusPlacement": "append",
+	"statusElementTag": "span",
+	"statusElementAttributes": {
+			"class": "comhead",
+			"style": "padding-left: 5px; margin-left: 5px; border-left: 1px solid #828282;"
+	},
+	"updateURL": "http://www.chrisfinke.com/comment-snob/rules/hn.snob"
+}

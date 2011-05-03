@@ -1,0 +1,14 @@
+{
+	"id": "reddit@chrisfinke.com",
+	"label": "Reddit",
+	"url": "^http://www\\.reddit\\.com/r/",
+	"allCommentsSelector": ".commentarea",
+	"commentContainerSelector": ".entry",
+		"commentTextSelector": ".noncollapsed .usertext-body",
+		"commentHideSelector": ".usertext-body, ul.buttons",
+	"statusElementTag": "span",
+	"statusContainerSelector" : ".tagline",
+	"statusPlacement": "append",
+	"ajaxInitiatorSelector": ".morecomments",
+	"updateURL": "http://www.chrisfinke.com/comment-snob/rules/reddit.snob"
+}

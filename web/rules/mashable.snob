@@ -1,0 +1,17 @@
+{
+	"id": "mashable@chrisfinke.com",
+	"label": "Mashable",
+	"url": "^http://mashable\\.com/",
+	"allCommentsSelector": "#disqus_thread",
+	"commentContainerSelector": "li.dsq-comment",
+			"commentTextSelector": ".dsq-comment-text",
+			"commentHideSelector": "> *",
+	"statusPlacement": "prepend",
+	"statusElementTag": "div",
+	"statusElementAttributes": { 
+		"class" : "dsq-comment-header"
+	},
+	"ajaxInitiatorSelector": ".dsq-more-button",
+	"updateURL": "http://www.chrisfinke.com/comment-snob/rules/mashable.snob",
+	"dynamic": true
+}

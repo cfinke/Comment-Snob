@@ -1,0 +1,282 @@
+<html>
+	<head>
+		<script src="jquery.js" type="text/javascript"></script>
+		<script src="minify.json.js" type="text/javascript"></script>
+		<script src="comment-snob.js" type="text/javascript"></script>
+		<link rel="stylesheet" type="text/css" href="skin/chrome-preferences-page.css" />
+		<script>
+			function populateRuleList() {
+				var ruleList = $("#sites");
+				
+				ruleList.find("li").each(function () {
+					if ($(this).attr("ruleid")) {
+						$(this).remove();
+					}
+				});
+				
+				ruleList.find("li").click();
+				
+				var rules = COMMENT_SNOB.prefs.getJSONPref("rules", {});
+
+				for (var i in rules) {
+					var option = $("<li/>");
+					option.addClass("navbar-item");
+					option.attr("ruleid", i);
+					option.text(rules[i].label);
+					option.attr("pagename", "rule");
+					option.val(i);
+					
+					ruleList.append(option);
+				}
+				
+				if (!("youtube@chrisfinke.com" in rules)) {
+					$("#reinstall-youtube").show();
+				}
+				else {
+					$("#reinstall-youtube").hide();
+				}
+			}
+			
+			function showRuleSettings(ruleId) {
+				var prefs = COMMENT_SNOB.prefs.getJSONPref("rulePrefs", {});
+				var customPrefs = false;
+				
+				if (ruleId in prefs) {
+					var rulePrefs = prefs[ruleId];
+					customPrefs = true;
+				}
+				else {
+					var rulePrefs = COMMENT_SNOB.defaultPrefs;
+				}
+
+				$(".preference-bool").each(function () {
+					this.checked = rulePrefs[$(this).attr("preference")];
+				});
+				
+				$(".preference-int").each(function () {
+					$(this).val(parseInt(rulePrefs[$(this).attr("preference")], 10));
+				});
+				
+				$("#custom-preferences").show();
+				
+				setDisabled();
+				
+				if (ruleId) {
+					$("#rule-management").show();
+					$("#default-preferences").show();
+					$("#remove").attr("ruleid", ruleId);
+					
+					if (!customPrefs) {
+						$("#use-default")[0].checked = true;
+					}
+					else {
+						$("#use-default").removeAttr("checked");
+					}
+				}
+				else {
+					$("#rule-management").hide();
+					$("#default-preferences").hide();
+				}
+				
+				$("#use-default").change();
+			}
+			
+			function setDisabled() {
+				var disabled = $("#extreme").is(":checked");
+
+				$(".preference").each(function () {
+					if ($(this).attr("id") != "extreme") {
+						$(this).attr("disabled", disabled);
+					}
+				});
+			}
+			
+			function save() {
+				var ruleId = $("#sites li.navbar-item-selected:first").attr("ruleid");
+				
+				if (!ruleId) {
+					$(".preference-bool").each(function () {
+						COMMENT_SNOB.prefs.setBoolPref($(this).attr("preference"), $(this).is(":checked"));
+					});
+					
+					$(".preference-int").each(function () {
+						COMMENT_SNOB.prefs.setIntPref($(this).attr("preference"), $(this).val());
+					});
+				}
+				else {
+					var prefObject = {};
+
+					$(".preference-bool").each(function () {
+						prefObject[$(this).attr("preference")] = $(this).is(":checked");
+					});
+
+					$(".preference-int").each(function () {
+						prefObject[$(this).attr("preference")] = $(this).val();
+					});
+
+					var prefs = COMMENT_SNOB.prefs.getJSONPref("rulePrefs", {});
+					prefs[ruleId] = prefObject;
+
+					COMMENT_SNOB.prefs.setJSONPref("rulePrefs", prefs);
+				}
+			}
+			
+			$(document).ready(function () {
+				COMMENT_SNOB.localize(document);
+				
+				document.title = chrome.i18n.getMessage("options_page_title");
+
+				$(".preference").change(function () {
+					save();
+				});
+
+				$("#extreme").click(setDisabled);
+
+				$("#remove").click(function () {
+					if (confirm("Are you sure?")) {
+						COMMENT_SNOB.removeRule($(this).attr("ruleid"));
+						populateRuleList();
+					}
+				});
+				
+				$(".navbar-item").live("click", function () {
+					$(".navbar-item-selected").removeClass("navbar-item-selected");
+					$(this).addClass("navbar-item-selected");
+					
+					$(".page").hide();
+					$("#" + $(this).attr("pagename") + "Page").show();
+				});
+				
+				$("#add-finish").click(function () {
+					$("#rule-error").hide();
+					
+					var rule = $("#add-rule").val();
+					
+					rule = JSON.minify(rule);
+					
+					try {
+						var jsonRule = JSON.parse(rule);
+					} catch (e) {
+						$("#rule-error").text("Invalid JSON: " + e).show();
+						return;
+					}
+					
+					var rv = COMMENT_SNOB.addRule(jsonRule);
+					
+					if (!rv.status) {
+						$("#rule-error").text(rv.msg).show();
+					}
+					else {
+						populateRuleList();
+						$("#sites li[ruleId='" + jsonRule.id + "']").click();
+						$("#add-rule").val("");
+					}
+				});
+				
+				$("#sites li").live("click", function () {
+					showRuleSettings($(this).attr("ruleid"));
+					
+					if ($(this).attr("ruleid")) {
+						$("#remove").attr("disabled", false);
+					}
+					else {
+						$("#remove").attr("disabled", true);
+					}
+				});
+				
+				$("#install-youtube").click(function (e) {
+					e.preventDefault();
+					
+					COMMENT_SNOB.addRule(COMMENT_SNOB.youtubeRule);
+					populateRuleList();
+					$("#sites li[ruleId='youtube@chrisfinke.com']").click();
+				});
+				
+				$("#use-default").change(function () {
+					var ruleId = $("#sites li.navbar-item-selected:first").attr("ruleid");
+					
+					if (ruleId && $(this).is(":checked")) {
+						$("#custom-preferences").hide();
+						COMMENT_SNOB.removeRulePrefs(ruleId);
+					}
+					else {
+						$("#custom-preferences").show();
+						
+						if (ruleId) {
+							save();
+						}
+					}
+				});
+				
+				populateRuleList();
+				
+				showRuleSettings();
+			});
+		</script>
+	</head>
+	
+	<body style="font-family: Helvetica, sans-serif; font-size: 13px;">
+		<div id="main-content">
+			<div id="navbar-container">
+				<h1 id="settings-title">Comment Snob</h1>
+				<h2 class="settings-subtitle">Filtering Rules</h2>
+				<ul id="sites">
+					<li class="navbar-item navbar-item-selected" pagename="rule"><i18n data-key="option_default" /></li>
+				</ul>
+				<ul style="margin-top: 30px;">
+					<li class="navbar-item" id="add" pagename="add"><i18n data-key="action_add" /></li>
+				</ul>
+			</div>
+			<div id="mainview">
+				<div id="mainview-content">
+					<div id="rulePage" class="page">
+						<h1>Preferences</h1>
+					
+						<section id="rule-management">
+							<h3>Rule Management</h3>
+							<div>
+								<button id="remove"><i18n data-key="action_remove" /></button>
+							</div>
+						</section>
+					
+						<section>
+							<h3>Filtering Preferences</h3>
+							<div>
+								<div id="default-preferences" style="margin-bottom: 30px;">
+									<p><input type="checkbox" id="use-default" /> <label>Use the default filtering preferences</label></p>
+								</div>
+								<div id="custom-preferences">
+									<p><input type="checkbox" preference="extreme" class="preference-bool preference" id="extreme" /> <label class="i18n" data-key="label_hide_all" /></p>
+									<div>
+									<p style="border-top: 1px solid #eee; padding-top: 15px;"><input type="number" size="2" min="0" preference="mistakes" class="preference-int preference" id="" /> <label class="i18n" data-key="label_hide_spelling" /></p>
+									<p><input type="checkbox" preference="nocaps" class="preference-bool preference" /> <label class="i18n" data-key="label_hide_no_capital" /></p>
+									<p><input type="checkbox" preference="allcaps" class="preference-bool preference" /> <label class="i18n" data-key="label_hide_only_capital" /></p>
+									<p><input type="checkbox" preference="startsWithCapital" class="preference-bool preference" /> <label class="i18n" data-key="label_hide_start_lower" /></p>
+									<p><input type="checkbox" preference="punctuation" class="preference-bool preference" /> <label class="i18n" data-key="label_hide_too_much_punctuation" /></p>
+									<p><input type="checkbox" preference="excessiveCapitals" class="preference-bool preference" /> <label class="i18n" data-key="label_hide_too_much_capitalization" /></p>
+									<p><input type="checkbox" preference="profanity" class="preference-bool preference" /> <label class="i18n" data-key="label_hide_too_much_profanity" /></p>
+								</div>
+							</div>
+						</section>
+					</div>
+					<div id="addPage" class="page" style="display: none;">
+						<h1>Add a New Rule</h1>
+						<p>Add your own rule below, or visit <a href="http://www.chrisfinke.com/comment-snob/">the Comment Snob homepage</a> for links to more rules.</p>
+						<p>For instructions on writing Comment Snob rules, see <a href="http://www.chrisfinke.com/comment-snob/#howto">this tutorial</a>.</p>
+						<p id="rule-error" style="display: none;"></p>
+						<section>
+							<div>
+								<textarea id="add-rule" cols="80" rows="20"></textarea>
+								<br />
+								<button id="add-finish">Save</button>
+							</div>
+						</section>
+						<section id="reinstall-youtube">
+							(You can re-install the default YouTube rule by clicking <a href="javascript:void(0);" id="install-youtube">here</a>.)
+						</section>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

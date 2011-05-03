@@ -1,0 +1,18 @@
+{
+	"id": "break@chrisfinke.com",
+	"label": "Break.com",
+	"url": "^http://www\\.break\\.com/",
+	"allCommentsSelector": "#comments-module-wrap, #content-comments-form, #tab-header-comments, #maincontent-module-topratedcomments",
+	"commentContainerSelector": ".comment_entry",
+		"commentTextSelector": ".comment_quote",
+		"commentHideSelector": "> *",
+	"statusElementTag": "div",
+	"statusElementAttributes" : {
+		"style" : "width: 100%;",
+		"class" : "comment_entry",
+		"comment-snob-processed" : "true"
+	},
+	"statusPlacement": "before",
+	"ajaxInitiatorSelector" : "#tab-header-comments, #comments-footer .break-link",
+	"updateURL": "http://www.chrisfinke.com/comment-snob/rules/break.snob"
+}
