@@ -25,8 +25,8 @@ var COMMENT_SNOB = {
 			"excessiveCapitals" : COMMENT_SNOB.prefs.getBoolPref("excessiveCapitals"),
 			"profanity" : COMMENT_SNOB.prefs.getBoolPref("profanity"),
 			"extreme" : COMMENT_SNOB.prefs.getBoolPref("extreme"),
-			"mistakes" : COMMENT_SNOB.prefs.getIntPref("mistakes")
-			
+			"mistakes" : COMMENT_SNOB.prefs.getIntPref("mistakes"),
+			"keywords" : COMMENT_SNOB.prefs.getCharPref("keywords")
 		};
 	},
 	

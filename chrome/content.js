@@ -62,6 +62,8 @@ function filterComments(isRefilter) {
 		allComments.remove();
 	}
 	else {
+		var parsedKeywords = null;
+		
 		allComments.find(theRule.commentContainerSelector).each(function (idx) {
 			var reason = false;
 			var $this = $(this);
@@ -107,38 +109,97 @@ function filterComments(isRefilter) {
 			else if (prefs.profanity && originalText.match(/\b(ass(hole)?\b|bitch|cunt|damn|(mother)?fuc[kc]|(bull)?shits?\b|fag|nigger|nigga)/i)) {
 				reason = chrome.i18n.getMessage("reason_too_much_profanity");
 			}
-			else if (prefs.mistakes) {
-				var now = new Date();
-				
-				var mistakes = 0;
-				var text = originalText;
-				
-				text = text.replace(/\s/mg, " ");
-				text = text.replace(/\s+|[^a-z0-9\-']/img, " "); //'
-				text = $.trim(text);
-				
-				words = text.split(" ");
-				
-				for (var j = 0, _jlen = words.length; j < _jlen; j++){
-					var word = words[j];
-					
-					if (!dictionary.check(word)){
-						if (
-							(word[0] === word[0].toUpperCase()) &&
-							(word.substring(1) === word.substring(1).toLowerCase())
-						) {
-							// Probably a name. We'll let it slide.
-						}
-						else {
-							mistakes++;
+			else {
+				if (prefs.keywords) {
+					if (!parsedKeywords) {
+						var filter = prefs.keywords;
+						
+						var filterString = filter.replace(/\s+/g, " ").replace(/^\s+|\s+$/g, "");
+						var filterParts = [];
+						
+						// We now have a space delimited filter string, but it may included quoted phrases
+						var currentFilter = "";
+						var inQuotes = 0;
+						
+						for (var i = 0; i < filterString.length; i++) {
+							var theChar = filterString.charAt(i);
 							
-							if (mistakes >= prefs.mistakes) break;
+							if (theChar == "'" || theChar == '"') {
+								if (inQuotes == theChar) {
+									inQuotes = false;
+								}
+								else if (currentFilter.length == 0) {
+									inQuotes = theChar;
+								}
+								else {
+									currentFilter += theChar;
+								}
+							}
+							else {
+								if (theChar == " "){ 
+									if (!inQuotes) {
+										filterParts.push(currentFilter);
+										currentFilter = "";
+										continue;
+									}
+								}
+								
+								currentFilter += filterString.charAt(i);
+							}
+						}
+						
+						if (currentFilter != "") filterParts.push(currentFilter);
+						
+						var parsedKeywords = [];
+						
+						for (var i = 0; i < filterParts.length; i++) {
+							if (filterParts[i]) {
+								parsedKeywords.push(new RegExp(filterParts[i], "i"));
+							}
+						}
+					}
+					
+					for (var i = 0, _len = parsedKeywords.length; i < _len; i++) {
+						if (originalText.match(parsedKeywords[i])) {
+							reason = chrome.i18n.getMessage("reason_keywords");
+							break;
 						}
 					}
 				}
 				
-				if (mistakes >= prefs.mistakes || mistakes == words.length) {
-					reason = chrome.i18n.getMessage("reason_spelling");
+				if (!reason && prefs.mistakes) {
+					var now = new Date();
+				
+					var mistakes = 0;
+					var text = originalText;
+				
+					text = text.replace(/\s/mg, " ");
+					text = text.replace(/\s+|[^a-z0-9\-']/img, " "); //'
+					text = $.trim(text);
+				
+					words = text.split(" ");
+				
+					for (var j = 0, _jlen = words.length; j < _jlen; j++){
+						var word = words[j];
+					
+						if (!dictionary.check(word)){
+							if (
+								(word[0] === word[0].toUpperCase()) &&
+								(word.substring(1) === word.substring(1).toLowerCase())
+							) {
+								// Probably a name. We'll let it slide.
+							}
+							else {
+								mistakes++;
+							
+								if (mistakes >= prefs.mistakes) break;
+							}
+						}
+					}
+				
+					if (mistakes >= prefs.mistakes || mistakes == words.length) {
+						reason = chrome.i18n.getMessage("reason_spelling");
+					}
 				}
 			}
 		

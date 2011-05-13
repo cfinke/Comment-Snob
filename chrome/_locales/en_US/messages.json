@@ -76,6 +76,10 @@
 		"message": "Profanity",
 		"description": "A reason shown to the user when hiding a comment."
 	},
+	"reason_keywords": {
+		"message" : "Contains a banned phrase or keyword",
+		"description": "A reason shown to the user when hiding a comment."
+	},
 	"reason_spelling": {
 		"message" : "Too many spelling mistakes",
 		"description": "A reason shown to the user when hiding a comment."
@@ -91,5 +95,12 @@
 	},
 	"install_rule": {
 		"message": "Install a Comment Snob Rule from this page"
+	},
+	"label_hide_keywords": {
+		"message": "Contains one of these keywords or phrases:"
+	},
+	"text_keywords_instructions": {
+		"message": "Separate keywords with spaces. To include a phrase, surround it with double quotes. Regular expressions are allowed."
 	}
+	
 }

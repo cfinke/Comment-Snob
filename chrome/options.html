@@ -17,7 +17,7 @@
 				ruleList.find("li").click();
 				
 				var rules = COMMENT_SNOB.prefs.getJSONPref("rules", {});
-
+				
 				for (var i in rules) {
 					var option = $("<li/>");
 					option.addClass("navbar-item");
@@ -48,13 +48,17 @@
 				else {
 					var rulePrefs = COMMENT_SNOB.defaultPrefs;
 				}
-
+				
 				$(".preference-bool").each(function () {
 					this.checked = rulePrefs[$(this).attr("preference")];
 				});
 				
 				$(".preference-int").each(function () {
 					$(this).val(parseInt(rulePrefs[$(this).attr("preference")], 10));
+				});
+
+				$(".preference-text").each(function () {
+					$(this).val(rulePrefs[$(this).attr("preference")]);
 				});
 				
 				$("#custom-preferences").show();
@@ -102,6 +106,10 @@
 					$(".preference-int").each(function () {
 						COMMENT_SNOB.prefs.setIntPref($(this).attr("preference"), $(this).val());
 					});
+
+					$(".preference-text").each(function () {
+						COMMENT_SNOB.prefs.setCharPref($(this).attr("preference"), $(this).val());
+					});
 				}
 				else {
 					var prefObject = {};
@@ -111,6 +119,10 @@
 					});
 
 					$(".preference-int").each(function () {
+						prefObject[$(this).attr("preference")] = $(this).val();
+					});
+
+					$(".preference-text").each(function () {
 						prefObject[$(this).attr("preference")] = $(this).val();
 					});
 
@@ -248,13 +260,14 @@
 								<div id="custom-preferences">
 									<p><input type="checkbox" preference="extreme" class="preference-bool preference" id="extreme" /> <label class="i18n" data-key="label_hide_all" /></p>
 									<div>
-									<p style="border-top: 1px solid #eee; padding-top: 15px;"><input type="number" size="2" min="0" preference="mistakes" class="preference-int preference" id="" /> <label class="i18n" data-key="label_hide_spelling" /></p>
-									<p><input type="checkbox" preference="nocaps" class="preference-bool preference" /> <label class="i18n" data-key="label_hide_no_capital" /></p>
-									<p><input type="checkbox" preference="allcaps" class="preference-bool preference" /> <label class="i18n" data-key="label_hide_only_capital" /></p>
-									<p><input type="checkbox" preference="startsWithCapital" class="preference-bool preference" /> <label class="i18n" data-key="label_hide_start_lower" /></p>
-									<p><input type="checkbox" preference="punctuation" class="preference-bool preference" /> <label class="i18n" data-key="label_hide_too_much_punctuation" /></p>
-									<p><input type="checkbox" preference="excessiveCapitals" class="preference-bool preference" /> <label class="i18n" data-key="label_hide_too_much_capitalization" /></p>
-									<p><input type="checkbox" preference="profanity" class="preference-bool preference" /> <label class="i18n" data-key="label_hide_too_much_profanity" /></p>
+									<p style="border-top: 1px solid #eee; padding-top: 15px;"><input type="number" size="2" min="0" preference="mistakes" class="preference-int preference" id="" /> <label class="i18n" data-key="label_hide_spelling"></label></p>
+									<p><input type="checkbox" preference="nocaps" class="preference-bool preference" /> <label class="i18n" data-key="label_hide_no_capital"></label></p>
+									<p><input type="checkbox" preference="allcaps" class="preference-bool preference" /> <label class="i18n" data-key="label_hide_only_capital"></label></p>
+									<p><input type="checkbox" preference="startsWithCapital" class="preference-bool preference" /> <label class="i18n" data-key="label_hide_start_lower"></label></p>
+									<p><input type="checkbox" preference="punctuation" class="preference-bool preference" /> <label class="i18n" data-key="label_hide_too_much_punctuation"></label></p>
+									<p><input type="checkbox" preference="excessiveCapitals" class="preference-bool preference" /> <label class="i18n" data-key="label_hide_too_much_capitalization"></label></p>
+									<p><input type="checkbox" preference="profanity" class="preference-bool preference" /> <label class="i18n" data-key="label_hide_too_much_profanity"></label></p>
+									<p><label class="i18n" data-key="label_hide_keywords"></label> <input type="text" preference="keywords" class="preference-text preference" size="40"/><br /><br /><small class="i18n" data-key="text_keywords_instructions"></small></p>
 								</div>
 							</div>
 						</section>
