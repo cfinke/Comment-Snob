@@ -1,20 +1,6 @@
 /**
  * Typo is a JavaScript implementation of a spellchecker using hunspell-style 
  * dictionaries.
- *
- * You can choose the backend implementation by setting this.implementation:
- *
- *   - hash: Stores the dictionary words as the keys of a hashand does a key
- *           existence check to determine whether a word is spelled correctly.
- *           Lookups are very fast, but this method uses the most memory.
- * 
- *   - binarysearch: stores the dictionary words in a series of strings and 
- *                   uses binary search to check whether a word exists in the 
- *                   dictionary. It uses less memory than the hash implementa-
- *                   tion, but lookups are slower.
- *
- * @todo Implement COMPOUNDRULE
- * @todo Implement suggestions.
  */
 
 /**
@@ -32,8 +18,6 @@
  */
 
 var Typo = function (dictionary, affData, wordsData) {
-	this.implementation = "hash";
-	
 	/** Determines the method used for auto-loading .aff and .dic files. **/
 	this.platform = "chrome";
 	
@@ -43,6 +27,10 @@ var Typo = function (dictionary, affData, wordsData) {
 	this.dictionaryTable = {};
 	
 	this.compoundRules = [];
+	this.compoundRuleCodes = {};
+	
+	this.replacementTable = [];
+	
 	this.flags = {};
 	
 	if (dictionary) {
@@ -54,7 +42,55 @@ var Typo = function (dictionary, affData, wordsData) {
 		}
 		
 		this.rules = this._parseAFF(affData);
+		
+		// Save the rule codes that are used in compound rules.
+		this.compoundRuleCodes = {};
+		
+		for (var i = 0, _len = this.compoundRules.length; i < _len; i++) {
+			var rule = this.compoundRules[i];
+			
+			for (var j = 0, _jlen = rule.length; j < _jlen; j++) {
+				this.compoundRuleCodes[rule[j]] = [];
+			}
+		}
+		
+		// If we add this ONLYINCOMPOUND flag to this.compoundRuleCodes, then _parseDIC
+		// will do the work of saving the list of words that are compound-only.
+		if ("ONLYINCOMPOUND" in this.flags) {
+			this.compoundRuleCodes[this.flags.ONLYINCOMPOUND] = [];
+		}
+		
 		this.dictionaryTable = this._parseDIC(wordsData);
+		
+		// Get rid of any codes from the compound rule codes that are never used 
+		// (or that were special regex characters).  Not especially necessary... 
+		for (var i in this.compoundRuleCodes) {
+			if (this.compoundRuleCodes[i].length == 0) {
+				delete this.compoundRuleCodes[i];
+			}
+		}
+		
+		// Build the full regular expressions for each compound rule.
+		// I have a feeling (but no confirmation yet) that this method of 
+		// testing for compound words is probably slow.
+		for (var i = 0, _len = this.compoundRules.length; i < _len; i++) {
+			var ruleText = this.compoundRules[i];
+			
+			var expressionText = "";
+			
+			for (var j = 0, _jlen = ruleText.length; j < _jlen; j++) {
+				var character = ruleText[j];
+				
+				if (character in this.compoundRuleCodes) {
+					expressionText += "(" + this.compoundRuleCodes[character].join("|") + ")";
+				}
+				else {
+					expressionText += character;
+				}
+			}
+			
+			this.compoundRules[i] = new RegExp(expressionText, "i");
+		}
 	}
 	
 	return this;
@@ -105,10 +141,7 @@ Typo.prototype = {
 		var rules = {};
 		
 		// Remove comment lines
-		data = data.replace(/\n#[^\n]*\n/g, "\n");
-		
-		// Remove blank lines
-		data = data.replace(/\n{2,}/g, "\n");
+		data = this._removeAffixComments(data);
 		
 		var lines = data.split("\n");
 		
@@ -131,11 +164,20 @@ Typo.prototype = {
 					
 					var lineParts = line.split(/\s+/);
 					var charactersToRemove = lineParts[2];
-					var charactersToAdd = lineParts[3];
+					
+					var additionParts = lineParts[3].split("/");
+					
+					var charactersToAdd = additionParts[0];
+					if (charactersToAdd === "0") charactersToAdd = "";
+					
+					var continuationClasses = this.parseRuleCodes(additionParts[1]);
+					
 					var regexToMatch = lineParts[4];
 					
 					var entry = {};
-					entry.add = charactersToAdd.toLowerCase();
+					entry.add = charactersToAdd;
+					
+					if (continuationClasses.length > 0) entry.continuationClasses = continuationClasses;
 					
 					if (regexToMatch !== ".") {
 						if (ruleType === "SFX") {
@@ -162,9 +204,6 @@ Typo.prototype = {
 				
 				i += numEntries;
 			}
-			else if (ruleType === "ONLYINCOMPOUND") {
-				this.flags.onlyincompound = definitionParts[1];
-			}
 			else if (ruleType === "COMPOUNDRULE") {
 				var numEntries = parseInt(definitionParts[1], 10);
 				
@@ -177,36 +216,60 @@ Typo.prototype = {
 				
 				i += numEntries;
 			}
+			else if (ruleType === "REP") {
+				var lineParts = line.split(/\s+/);
+				
+				if (lineParts.length === 3) {
+					this.replacementTable.push([ lineParts[1], lineParts[2] ]);
+				}
+			}
+			else {
+				// ONLYINCOMPOUND
+				// COMPOUNDMIN
+				// FLAG
+				// KEEPCASE
+				// NEEDAFFIX
+				
+				this.flags[ruleType] = definitionParts[1];
+			}
 		}
 		
 		return rules;
 	},
 	
 	/**
-	 * Parses the words out from the .dic file.
+	 * Removes comment lines and then cleans up blank lines and trailing whitespace.
 	 *
-	 * @param {String} data The data from the dictionary file.
-	 * @returns object The implementation-specific dictionary.
+	 * @param {String} data The data from an affix file.
+	 * @return {String} The cleaned-up data.
 	 */
 	
-	_parseDIC : function (data) {
-		if (this.implementation == "binarysearch") {
-			return this._parseDICBinarySearch(data);
-		}
-		else {
-			return this._parseDICHash(data);
-		}
+	_removeAffixComments : function (data) {
+		// Remove comments
+		data = data.replace(/#.*$/mg, "");
+		
+		// Trim each line
+		data = data.replace(/^\s\s*/m, '').replace(/\s\s*$/m, '');
+		
+		// Remove blank lines.
+		data = data.replace(/\n{2,}/g, "\n");
+		
+		// Trim the entire string
+		data = data.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+		
+		return data;
 	},
 	
 	/**
-	 * Parses the .dic file and returns a hash of all of the words within.
+	 * Parses the words out from the .dic file.
 	 *
-	 * @param {String} data The contents of the .dic file.
-	 * @returns {Object} The hash of all of the words from the .dic file.
+	 * @param {String} data The data from the dictionary file.
+	 * @returns object The lookup table containing all of the words and
+	 *                 word forms from the dictionary.
 	 */
 	
-	_parseDICHash : function (data) {
-		// @todo Support ONLYINCOMPOUND
+	_parseDIC : function (data) {
+		data = this._removeDicComments(data);
 		
 		var lines = data.split("\n");
 		var dictionaryTable = {};
@@ -217,38 +280,43 @@ Typo.prototype = {
 			
 			var parts = line.split("/", 2);
 			
-			var word = parts[0].toLowerCase();
-			
+			var word = parts[0];
+
 			// Now for each affix rule, generate that form of the word.
 			if (parts.length > 1) {
-				var ruleCodes = parts[1];
+				var ruleCodesArray = this.parseRuleCodes(parts[1]);
 				
 				// Save the ruleCodes for compound word situations.
-				dictionaryTable[word] = ruleCodes;
+				if (!("NEEDAFFIX" in this.flags) || ruleCodesArray.indexOf(this.flags.NEEDAFFIX) == -1) {
+					dictionaryTable[word] = ruleCodesArray;
+				}
 				
-				for (var j = 0, _jlen = ruleCodes.length; j < _jlen; j++) {
-					var code = ruleCodes[j];
+				for (var j = 0, _jlen = ruleCodesArray.length; j < _jlen; j++) {
+					var code = ruleCodesArray[j];
 					
 					var rule = this.rules[code];
 					
 					if (rule) {
-						var newWord = this._applyRule(word, rule);
+						var newWords = this._applyRule(word, rule);
 						
-						if (newWord) {
-							dictionaryTable[newWord] = true;
+						for (var ii = 0, _iilen = newWords.length; ii < _iilen; ii++) {
+							var newWord = newWords[ii];
+						
+							dictionaryTable[newWord] = "";
 							
 							if (rule.combineable) {
 								for (var k = j + 1; k < _jlen; k++) {
-									var combineCode = ruleCodes[k];
+									var combineCode = ruleCodesArray[k];
 									
 									var combineRule = this.rules[combineCode];
 									
 									if (combineRule) {
 										if (combineRule.combineable && (rule.type != combineRule.type)) {
-											var otherNewWord = this._applyRule(newWord, combineRule);
+											var otherNewWords = this._applyRule(newWord, combineRule);
 											
-											if (otherNewWord) {
-												dictionaryTable[otherNewWord] = true;
+											for (var iii = 0, _iiilen = otherNewWords.length; iii < _iiilen; iii++) {
+												var otherNewWord = otherNewWords[iii];
+												dictionaryTable[otherNewWord] = "";
 											}
 										}
 									}
@@ -256,105 +324,68 @@ Typo.prototype = {
 							}
 						}
 					}
+					
+					if (code in this.compoundRuleCodes) {
+						this.compoundRuleCodes[code].push(word);
+					}
 				}
 			}
 			else {
-				dictionaryTable[word] = true;
+				dictionaryTable[word] = "";
 			}
 		}
 		
 		return dictionaryTable;
 	},
 	
+	
 	/**
-	 * Parses the .dic file and generates an array containing the concat-
-	 * enations of all words of identical length. array[1] will contain all
-	 * words of length 1, array[2] all words of length 2, and so on.
+	 * Removes comment lines and then cleans up blank lines and trailing whitespace.
 	 *
-	 * @param {String} data The contents of the .dic file.
-	 * @returns {String[]} The array of word sets.
+	 * @param {String} data The data from a .dic file.
+	 * @return {String} The cleaned-up data.
 	 */
 	
-	_parseDICBinarySearch : function (data) {
-		var lines = data.split("\n");
+	_removeDicComments : function (data) {
+		// I can't find any official documentation on it, but at least the de_DE
+		// dictionary uses tab-indented lines as comments.
 		
-		var patternTable = {};
+		// Remove comments
+		data = data.replace(/^\t.*$/mg, "");
 		
-		// The first line is the number of words in the dictionary.
-		for (var i = 0, _len = lines.length; i < _len; i++) {
-			var line = lines[i];
-			
-			var parts = line.split("/", 2);
-			
-			var word = parts[0].toLowerCase();
-			
-			if (!(word.length in patternTable)) patternTable[word.length] = [];
-			patternTable[word.length].push(word);
-			
-			// Now for each affix rule, generate that form of the word.
-			if (parts.length > 1) {
-				var ruleCodes = parts[1];
-				
-				for (var j = 0, _jlen = ruleCodes.length; j < _jlen; j++) {
-					var code = ruleCodes[j];
-					
-					if (code in this.rules) {
-						var rule = this.rules[code];
-						
-						var newWord = this._applyRule(word, rule);
-						
-						if (newWord) {
-							if (!(newWord.length in patternTable)) patternTable[newWord.length] = [];
-							patternTable[newWord.length].push(newWord);
-							
-							if (rule.combineable) {
-								for (var k = j + 1; k < _jlen; k++) {
-									var combineCode = ruleCodes[k];
-									
-									if (combineCode in this.rules) {
-										var combineRule = this.rules[combineCode];
-										
-										if ((rule.type != combineRule.type) && combineRule.combineable) {
-											var otherNewWord = this._applyRule(newWord, combineRule);
-											
-											if (otherNewWord) {
-												if (!(otherNewWord.length in patternTable)) patternTable[otherNewWord.length] = [];
-												patternTable[otherNewWord.length].push(otherNewWord);
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
+		return data;
+		
+		// Trim each line
+		data = data.replace(/^\s\s*/m, '').replace(/\s\s*$/m, '');
+		
+		// Remove blank lines.
+		data = data.replace(/\n{2,}/g, "\n");
+		
+		// Trim the entire string
+		data = data.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+		
+		return data;
+	},
+	
+	parseRuleCodes : function (textCodes) {
+		if (!textCodes) {
+			return [];
 		}
-		
-		function unique(arr) {
-			var narr = [];
+		else if (!("FLAG" in this.flags)) {
+			return textCodes.split("");
+		}
+		else if (this.flags.FLAG === "long") {
+			var flags = [];
 			
-			for (var i = 0, _len = arr.length; i < _len; i++) {
-				if (i === 0) {
-					narr.push(arr[0]);
-				}
-				else {
-					if (arr[i-1] !== arr[i]) {
-						narr.push(arr[i]);
-					}
-				}
+			for (var i = 0, _len = textCodes.length; i < _len; i += 2) {
+				flags.push(textCodes.substr(i, 2));
 			}
 			
-			return narr;
+			return flags;
 		}
-		
-		for (var i in patternTable) {
-			patternTable[i].sort();
-			
-			patternTable[i] = unique(patternTable[i]).join("");
+		else if (this.flags.FLAG === "num") {
+			return textCode.split(",");
 		}
-		
-		return patternTable;
 	},
 	
 	/**
@@ -362,11 +393,12 @@ Typo.prototype = {
 	 *
 	 * @param {String} word The base word.
 	 * @param {Object} rule The affix rule.
-	 * @returns {String} The new word generated by the rule.
+	 * @returns {String[]} The new words generated by the rule.
 	 */
 	
 	_applyRule : function (word, rule) {
 		var entries = rule.entries;
+		var newWords = [];
 		
 		for (var i = 0, _len = entries.length; i < _len; i++) {
 			var entry = entries[i];
@@ -385,7 +417,76 @@ Typo.prototype = {
 					newWord = entry.add + newWord;
 				}
 				
-				return newWord;
+				newWords.push(newWord);
+				
+				if ("continuationClasses" in entry) {
+					for (var j = 0, _jlen = entry.continuationClasses.length; j < _jlen; j++) {
+						var continuationRule = this.rules[entry.continuationClasses[j]];
+						
+						if (continuationRule) {
+							newWords = newWords.concat(this._applyRule(newWord, continuationRule));
+						}
+						/*
+						else {
+							// This shouldn't happen, but it does, at least in the de_DE dictionary.
+							// I think the author mistakenly supplied lower-case rule codes instead 
+							// of upper-case.
+						}
+						*/
+					}
+				}
+			}
+		}
+		
+		return newWords;
+	},
+	
+	/**
+	 * Checks whether a word or a capitalization variant exists in the current dictionary.
+	 * The word is trimmed and several variations of capitalizations are checked.
+	 * If you want to check a word without any changes made to it, call checkExact()
+	 *
+	 * @see http://blog.stevenlevithan.com/archives/faster-trim-javascript re:trimming function
+	 *
+	 * @param {String} aWord The word to check.
+	 * @returns {Boolean}
+	 */
+	
+	check : function (aWord) {
+		// Remove leading and trailing whitespace
+		var trimmedWord = aWord.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+		
+		if (this.checkExact(trimmedWord)) {
+			return true;
+		}
+		
+		// The exact word is not in the dictionary.
+		if (trimmedWord.toUpperCase() === trimmedWord) {
+			// The word was supplied in all uppercase.
+			// Check for a capitalized form of the word.
+			var capitalizedWord = trimmedWord[0] + trimmedWord.substring(1).toLowerCase();
+			
+			if (this.hasFlag(capitalizedWord, "KEEPCASE")) {
+				// Capitalization variants are not allowed for this word.
+				return false;
+			}
+			
+			if (this.checkExact(capitalizedWord)) {
+				return true;
+			}
+		}
+		
+		var lowercaseWord = trimmedWord.toLowerCase();
+		
+		if (lowercaseWord !== trimmedWord) {
+			if (this.hasFlag(lowercaseWord, "KEEPCASE")) {
+				// Capitalization variants are not allowed for this word.
+				return false;
+			}
+			
+			// Check for a lowercase form
+			if (this.checkExact(lowercaseWord)) {
+				return true;
 			}
 		}
 		
@@ -399,97 +500,228 @@ Typo.prototype = {
 	 * @returns {Boolean}
 	 */
 	
-	check : function (word) {
-		word = word.toLowerCase();
+	checkExact : function (word) {
+		var ruleCodes = this.dictionaryTable[word];
 		
-		if (this.implementation == "binarysearch") {
-			return this._checkBinaryString(word);
-		}
-		else {
-			return this._checkHash(word);
-		}
-	},
-	
-	/**
-	 * Hash implementation of check()
-	 *
-	 * @param {String} word The word to check.
-	 * @returns {Boolean}
-	 */
-	
-	_checkHash : function (word) {
-		return (word in this.dictionaryTable);
-	},
-	
-	/**
-	 * Binary search implementation of check()
-	 *
-	 * Code originally written by "Randall"
-	 * @see http://ejohn.org/blog/revised-javascript-dictionary-search/
-	 *
-	 * @param {String} word The word to check.
-	 * @returns {Boolean}
-	 */
-	
-	_checkBinaryString : function (word) {
-		var dict = this.dictionaryTable;
-		
-		// Figure out which bin we're going to search
-		var l = word.length;
-		
-		// Don't search if there's nothing to look through
-		if ( !dict[l] ) {
+		if (typeof ruleCodes === 'undefined') {
+			// Check if this might be a compound word.
+			if ("COMPOUNDMIN" in this.flags && word.length >= this.flags.COMPOUNDMIN) {
+				for (var i = 0, _len = this.compoundRules.length; i < _len; i++) {
+					if (word.match(this.compoundRules[i])) {
+						return true;
+					}
+				}
+			}
+			
 			return false;
 		}
-		
-		// Get the number of words in the dictionary bin
-		var words = dict[l].length / l,
-			// The low point from where we're starting the binary search
-			low = 0,
+		else {
+			if (this.hasFlag(word, "ONLYINCOMPOUND")) {
+				return false;
+			}
 			
-			// The max high point
-			high = words - 1,
+			return true;
+		}
+	},
+	
+	/**
+	 * Looks up whether a given word is flagged with a given flag.
+	 *
+	 * @param {String} word The word in question.
+	 * @param {String} flag The flag in question.
+	 * @return {Boolean}
+	 */
+	 
+	hasFlag : function (word, flag) {
+		if (flag in this.flags) {
+			var wordFlags = this.dictionaryTable[word];
 			
-			// And the precise middle of the search
-			mid = Math.floor( words / 2 );
-			
-		// We continue to look until we reach a final word
-		while ( high >= low ) {
-			// Grab the word at our current position
-			var found = dict[l].substr( l * mid, l );
-			
-			// If we've found the word, stop now
-			if ( word === found ) {
+			if (wordFlags && wordFlags.indexOf(this.flags[flag]) !== -1) {
 				return true;
 			}
-			
-			// Otherwise, compare
-			// If we're too high, move lower
-			if ( word < found ) {
-				high = mid - 1;
-				// If we're too low, go higher
-			} else {
-				low = mid + 1;
-			}
-			
-			// And find the new search point
-			mid = Math.floor( (low + high) / 2 );
 		}
 		
-		// Nothing was found
 		return false;
 	},
 	
 	/**
 	 * Returns a list of suggestions for a misspelled word.
 	 *
-	 * @todo Not yet implemented.
+	 * @see http://www.norvig.com/spell-correct.html for the basis of this suggestor.
+	 * This suggestor is primitive, but it works.
 	 *
 	 * @param {String} word The misspelling.
+	 * @param {Number} [limit=5] The maximum number of suggestions to return.
 	 * @returns {String[]} The array of suggestions.
 	 */
 	
-	suggest : function (word) {
-		throw "suggest not implemented.";
+	alphabet : "",
+	
+	suggest : function (word, limit) {
+		if (!limit) limit = 5;
+		
+		if (this.check(word)) return [];
+		
+		// Check the replacement table.
+		for (var i = 0, _len = this.replacementTable.length; i < _len; i++) {
+			var replacementEntry = this.replacementTable[i];
+			
+			if (word.indexOf(replacementEntry[0]) !== -1) {
+				var correctedWord = word.replace(replacementEntry[0], replacementEntry[1]);
+				
+				if (this.check(correctedWord)) {
+					return [ correctedWord ];
+				}
+			}
+		}
+		
+		var self = this;
+		self.alphabet = "abcdefghijklmnopqrstuvwxyz";
+		
+		/*
+		if (!self.alphabet) {
+			// Use the alphabet as implicitly defined by the words in the dictionary.
+			var alphaHash = {};
+			
+			for (var i in self.dictionaryTable) {
+				for (var j = 0, _len = i.length; j < _len; j++) {
+					alphaHash[i[j]] = true;
+				}
+			}
+			
+			for (var i in alphaHash) {
+				self.alphabet += i;
+			}
+			
+			var alphaArray = self.alphabet.split("");
+			alphaArray.sort();
+			self.alphabet = alphaArray.join("");
+		}
+		*/
+		
+		function edits1(words) {
+			var rv = [];
+			
+			for (var ii = 0, _iilen = words.length; ii < _iilen; ii++) {
+				var word = words[ii];
+				
+				var splits = [];
+			
+				for (var i = 0, _len = word.length + 1; i < _len; i++) {
+					splits.push([ word.substring(0, i), word.substring(i, word.length) ]);
+				}
+			
+				var deletes = [];
+			
+				for (var i = 0, _len = splits.length; i < _len; i++) {
+					var s = splits[i];
+				
+					if (s[1]) {
+						deletes.push(s[0] + s[1].substring(1));
+					}
+				}
+			
+				var transposes = [];
+			
+				for (var i = 0, _len = splits.length; i < _len; i++) {
+					var s = splits[i];
+				
+					if (s[1].length > 1) {
+						transposes.push(s[0] + s[1][1] + s[1][0] + s[1].substring(2));
+					}
+				}
+			
+				var replaces = [];
+			
+				for (var i = 0, _len = splits.length; i < _len; i++) {
+					var s = splits[i];
+				
+					if (s[1]) {
+						for (var j = 0, _jlen = self.alphabet.length; j < _jlen; j++) {
+							replaces.push(s[0] + self.alphabet[j] + s[1].substring(1));
+						}
+					}
+				}
+			
+				var inserts = [];
+			
+				for (var i = 0, _len = splits.length; i < _len; i++) {
+					var s = splits[i];
+				
+					if (s[1]) {
+						for (var j = 0, _jlen = self.alphabet.length; j < _jlen; j++) {
+							replaces.push(s[0] + self.alphabet[j] + s[1]);
+						}
+					}
+				}
+			
+				rv = rv.concat(deletes);
+				rv = rv.concat(transposes);
+				rv = rv.concat(replaces);
+				rv = rv.concat(inserts);
+			}
+			
+			return rv;
+		}
+		
+		function known(words) {
+			var rv = [];
+			
+			for (var i = 0; i < words.length; i++) {
+				if (self.check(words[i])) {
+					rv.push(words[i]);
+				}
+			}
+			
+			return rv;
+		}
+		
+		function correct(word) {
+			// Get the edit-distance-1 and edit-distance-2 forms of this word.
+			var ed1 = edits1([word]);
+			var ed2 = edits1(ed1);
+			
+			var corrections = known(ed1).concat(known(ed2));
+			
+			// Sort the edits based on how many different ways they were created.
+			var weighted_corrections = {};
+			
+			for (var i = 0, _len = corrections.length; i < _len; i++) {
+				if (!(corrections[i] in weighted_corrections)) {
+					weighted_corrections[corrections[i]] = 1;
+				}
+				else {
+					weighted_corrections[corrections[i]] += 1;
+				}
+			}
+			
+			var sorted_corrections = [];
+			
+			for (var i in weighted_corrections) {
+				sorted_corrections.push([ i, weighted_corrections[i] ]);
+			}
+			
+			function sorter(a, b) {
+				if (a[1] < b[1]) {
+					return -1;
+				}
+				
+				return 1;
+			}
+			
+			sorted_corrections.sort(sorter).reverse();
+			
+			var rv = [];
+			
+			for (var i = 0, _len = Math.min(limit, sorted_corrections.length); i < _len; i++) {
+				if (!self.hasFlag(sorted_corrections[i][0], "NOSUGGEST")) {
+					rv.push(sorted_corrections[i][0]);
+				}
+			}
+			
+			return rv;
+		}
+		
+		return correct(word);
 	}
 };
