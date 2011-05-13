@@ -88,6 +88,7 @@ function filterComments(isRefilter) {
 			var originalText = textContainer.text();
 			originalText = originalText.replace(/https?:\/\/[^\s]+\s/g, "");
 			originalText = $.trim(originalText);
+			originalText = originalText.replace(/@[^\s]+/ig, ""); // Get rid of username references.
 			originalText = originalText.replace(/^[^A-Z0-9]+/ig, "");
 			originalText = $.trim(originalText);
 			
@@ -181,7 +182,12 @@ function filterComments(isRefilter) {
 				
 					for (var j = 0, _jlen = words.length; j < _jlen; j++){
 						var word = words[j];
-					
+						
+						if (!word.match(/[a-z]/i)) {
+							// Not a single alphabetic character.
+							continue;
+						}
+						
 						if (!dictionary.check(word)){
 							if (
 								(word[0] === word[0].toUpperCase()) &&
@@ -192,7 +198,9 @@ function filterComments(isRefilter) {
 							else {
 								mistakes++;
 							
-								if (mistakes >= prefs.mistakes) break;
+								if (mistakes >= prefs.mistakes) {
+									break;
+								}
 							}
 						}
 					}
