@@ -1,7 +1,7 @@
 {
 	"name": "__MSG_extName__",
 	"description": "__MSG_extDescription__",
-	"version": "5",
+	"version": "6",
 	"icons" : {
 		"16": "skin/icon-16.png",
 		"48": "skin/icon-48.png",

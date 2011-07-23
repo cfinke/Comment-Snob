@@ -22,6 +22,7 @@ chrome.extension.onRequest.addListener(function (request, sender, sendResponse) 
 			
 			$(theRule.allCommentsSelector).each(function (idx, el) {
 				el.addEventListener("DOMNodeRemoved", filterDynamicComments, false);
+				el.addEventListener("DOMNodeInserted", filterDynamicComments, false);
 			});
 		}
 		else {
@@ -46,6 +47,7 @@ function filterDynamicComments() {
 function doFilterDynamicComments() {
 	$(theRule.allCommentsSelector).each(function (idx, el) {
 		el.removeEventListener("DOMNodeRemoved", filterDynamicComments, false);
+		el.removeEventListener("DOMNodeInserted", filterDynamicComments, false);
 	});
 	
 	filterComments();
@@ -262,6 +264,7 @@ function filterComments(isRefilter) {
 			$(theRule.ajaxInitiatorSelector).live("click", function (e) {
 				allComments.each(function (idx, el) {
 					el.addEventListener("DOMNodeRemoved", refilterComments, false);
+					el.addEventListener("DOMNodeInserted", refilterComments, false);
 				});
 			});
 		}
@@ -279,6 +282,7 @@ function refilterComments() {
 function doRefilterComments() {
 	$(theRule.allCommentsSelector).each(function (idx, el) {
 		el.removeEventListener("DOMNodeRemoved", refilterComments, false);
+		el.removeEventListener("DOMNodeInserted", refilterComments, false);
 	});
 	
 	filterComments(true);
