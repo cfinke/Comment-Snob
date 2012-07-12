@@ -39,12 +39,7 @@
 		"message": "Hide comments with at least this many spelling mistakes. (Set to zero to disable spellchecking.)"
 	},
 	"label_hidden_reason": {
-		"message": "Comment hidden ($reason$)",
-		"placeholders": {
-			"reason": {
-				"content": "$1"
-			}
-		}
+		"message": "Comment hidden ($1)"
 	},
 	"label_show": {
 		"message": "Show"
