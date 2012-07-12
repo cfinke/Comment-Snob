@@ -370,7 +370,7 @@ var EXTENSION = {
 		var browserWin = Services.wm.getMostRecentWindow( "navigator:browser" );
 		var page = browserWin.content.document;
 
-		// Check for any rules.
+		// Check if this page is a comment snob rule.
 		if (page.location.href.match(/\.snob(\?.*)?$/i)) {
 			var rule = minify( page.body.textContent );
 
