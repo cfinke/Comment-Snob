@@ -1,0 +1,108 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://comment-snob/content/skin/firefox-preferences-page.css" type="text/css"?>
+<prefwindow
+	title="Comment Snob - Options"
+	buttons="accept"
+	id="comment-snob-options"
+	style="min-width: 900px; min-height: 600px; overflow: scroll;"
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<script src="chrome://comment-snob/content/bootstrap-lib.js" type="application/x-javascript"></script>
+	<script src="chrome://comment-snob/content/extension.js" type="application/x-javascript"></script>
+	<script src="chrome://comment-snob/content/minify.js" type="application/x-javascript"></script>
+	<prefpane flex="1" id="all-prefs">
+		<hbox id="main-content" flex="1">
+			<vbox id="navbar-container" pack="start" flex="1">
+				<label class="header">Comment Snob</label>
+				<label class="settings-subtitle">Filtering Rules</label>
+				<label id="default-rule" class="navbar-item navbar-item-selected" pagename="rule" data-key="option_default"></label>
+				<label class="navbar-item" id="add" pagename="add" data-key="action_add"></label>
+			</vbox>
+			<vbox id="mainview" flex="5">
+				<vbox id="mainview-content" flex="1">
+					<vbox id="rulePage" class="page" flex="1">
+						<label class="header">Preferences</label>
+						
+						<hbox class="section" id="rule-management" flex="1">
+							<vbox flex="1">
+								<label class="subheader">Rule Management</label>
+							</vbox>
+							<hbox flex="5">
+								<vbox>
+									<button id="remove" data-key-label="action_remove" />
+									<spacer flex="1" />
+								</vbox>
+								<spacer flex="1" />
+							</hbox>
+						</hbox>
+
+						<hbox class="section" flex="1">
+							<vbox flex="1">
+								<label class="subheader">Filtering Preferences</label>
+							</vbox>
+							
+							<vbox flex="5">
+								<vbox id="default-preferences">
+									<checkbox id="use-default" label="Use the default filtering preferences" />
+								</vbox>
+								<vbox id="custom-preferences">
+									<vbox class="section">
+										<checkbox preference="extreme" class="preference-bool preference" id="extreme" data-key-label="label_hide_all" />
+									</vbox>
+									<hbox align="center">
+										<textbox size="2" min="0" preference="mistakes" class="preference-int preference" />
+										<label data-key="label_hide_spelling"></label>
+									</hbox>
+									<checkbox preference="nocaps" class="preference-bool preference" data-key-label="label_hide_no_capital"/>
+									<checkbox preference="allcaps" class="preference-bool preference" data-key-label="label_hide_only_capital"/>
+									<checkbox preference="startsWithCapital" class="preference-bool preference" data-key-label="label_hide_start_lower"/>
+									<checkbox preference="punctuation" class="preference-bool preference" data-key-label="label_hide_too_much_punctuation"/>
+									<checkbox preference="excessiveCapitals" class="preference-bool preference" data-key-label="label_hide_too_much_capitalization"/>
+									<checkbox preference="profanity" class="preference-bool preference" data-key-label="label_hide_too_much_profanity"/>
+									<vbox>
+										<hbox align="center">
+											<label data-key="label_hide_keywords" />
+											<textbox preference="keywords" class="preference-text preference" size="40" />
+										</hbox>
+										<label class="footnote" data-key="text_keywords_instructions" />
+									</vbox>
+								</vbox>
+							</vbox>
+						</hbox>
+					</vbox>
+					<vbox id="addPage" class="page" style="display: none;" flex="1">
+						<label class="header">Add a New Rule</label>
+						<description>Add your own rule below, or visit <label class="text-link" href="http://www.chrisfinke.com/comment-snob/">the Comment Snob homepage</label> for links to more rules.</description>
+						<description>For instructions on writing Comment Snob rules, see <label class="text-link" href="http://www.chrisfinke.com/comment-snob/#howto">this tutorial</label>.</description>
+						<description id="rule-error" style="display: none;"></description>
+						<vbox class="section">
+							<vbox>
+								<textbox multiline="true" id="add-rule" cols="80" rows="20"></textbox>
+								<hbox>
+									<button id="add-finish" label="Save" />
+									<spacer flex="1" />
+								</hbox>
+							</vbox>
+							<spacer flex="1" />
+						</vbox>
+						<vbox class="section">
+							<description id="reinstall-youtube">
+								(You can re-install the default YouTube rule by clicking <label class="text-link" href="javascript:void(0);" id="install-youtube">here</label>.)
+							</description>
+						</vbox>
+					</vbox>
+				</vbox>
+			</vbox>
+		</hbox>
+	</prefpane>
+	<script type="application/x-javascript">
+		<![CDATA[
+		
+		(function(loader){
+			loader.loadSubScript("chrome://comment-snob/content/jquery-1.7.2.min.js");
+			loader.loadSubScript("chrome://comment-snob/content/options.js");
+		})( Components.classes["@mozilla.org/moz/jssubscript-loader;1"].getService( Components.interfaces.mozIJSSubScriptLoader ) );
+		
+		]]>
+	</script>
+</prefwindow>
