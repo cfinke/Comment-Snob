@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE overlay [
+	<!ENTITY % localLocale SYSTEM "chrome://comment-snob/locale/locale.dtd">
+	%localLocale;
+	<!ENTITY % backupLocale SYSTEM "chrome://comment-snob-default-locale/content/locale.dtd">
+	%backupLocale;
+]>
+<overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<script type="application/x-javascript" src="chrome://comment-snob/content/overlay.js"></script>
+	<script type="application/x-javascript">
+		<![CDATA[
+		
+		addEventListener( 'load', function () {
+			removeEventListener( 'load', arguments.callee, false );
+			COMMENT_SNOB.load();
+		}, false );
+
+		addEventListener( 'unload', function () {
+			removeEventListener( 'load', arguments.callee, false );
+			COMMENT_SNOB.unload();
+		}, false );
+		
+		]]>
+	</script>
+	<stringbundleset id="stringbundleset">
+		<stringbundle id="comment-snob-backup-string-bundle" src="chrome://comment-snob-default-locale/content/locale.properties" />
+		<stringbundle id="comment-snob-string-bundle" src="chrome://comment-snob/locale/locale.properties" />
+	</stringbundleset>
+</overlay>

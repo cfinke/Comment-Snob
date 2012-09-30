@@ -1,7 +1,7 @@
 function populateRuleList() {
 	$( "#navbar-container label.user-rule" ).remove();
 	
-	var rules = EXTENSION.prefs.getJSONPref("rules", {});
+	var rules = COMMENT_SNOB.getJSONPref("rules", {});
 	
 	for (var i in rules) {
 		var option = $( '<label/>' );
@@ -25,7 +25,7 @@ function populateRuleList() {
 }
 
 function showRuleSettings(ruleId) {
-	var prefs = EXTENSION.prefs.getJSONPref("rulePrefs", {});
+	var prefs = COMMENT_SNOB.getJSONPref("rulePrefs", {});
 	
 	var customPrefs = false;
 	
@@ -34,19 +34,19 @@ function showRuleSettings(ruleId) {
 		customPrefs = true;
 	}
 	else {
-		var rulePrefs = EXTENSION.defaultPrefs;
+		var rulePrefs = COMMENT_SNOB.defaultPrefs;
 	}
 	
 	$(".preference-bool").each(function () {
-		this.checked = rulePrefs[$(this).attr("preference")];
+		this.checked = rulePrefs[$(this).attr("pref")];
 	});
 	
 	$(".preference-int").each(function () {
-		$(this).val(parseInt(rulePrefs[$(this).attr("preference")], 10));
+		$(this).val(parseInt(rulePrefs[$(this).attr("pref")], 10));
 	});
 
 	$(".preference-text").each(function () {
-		$(this).val(rulePrefs[$(this).attr("preference")]);
+		$(this).val(rulePrefs[$(this).attr("pref")]);
 	});
 	
 	$("#custom-preferences").css("visibility", "visible");
@@ -93,36 +93,36 @@ function save() {
 	
 	if (!ruleId) {
 		$(".preference-bool").each(function () {
-			EXTENSION.prefs.setBoolPref($(this).attr("preference"), $(this).is(":checked"));
+			COMMENT_SNOB.prefs.setBoolPref($(this).attr("pref"), $(this).is(":checked"));
 		});
 		
 		$(".preference-int").each(function () {
-			EXTENSION.prefs.setIntPref($(this).attr("preference"), $(this).val());
+			COMMENT_SNOB.prefs.setIntPref($(this).attr("pref"), $(this).val());
 		});
 
 		$(".preference-text").each(function () {
-			EXTENSION.prefs.setCharPref($(this).attr("preference"), $(this).val());
+			COMMENT_SNOB.prefs.setCharPref($(this).attr("pref"), $(this).val());
 		});
 	}
 	else {
 		var prefObject = {};
 
 		$(".preference-bool").each(function () {
-			prefObject[$(this).attr("preference")] = $(this).is(":checked");
+			prefObject[$(this).attr("pref")] = $(this).is(":checked");
 		});
 
 		$(".preference-int").each(function () {
-			prefObject[$(this).attr("preference")] = $(this).val();
+			prefObject[$(this).attr("pref")] = $(this).val();
 		});
 
 		$(".preference-text").each(function () {
-			prefObject[$(this).attr("preference")] = $(this).val();
+			prefObject[$(this).attr("pref")] = $(this).val();
 		});
 
-		var prefs = EXTENSION.prefs.getJSONPref("rulePrefs", {});
+		var prefs = COMMENT_SNOB.getJSONPref("rulePrefs", {});
 		prefs[ruleId] = prefObject;
 
-		EXTENSION.prefs.setJSONPref("rulePrefs", prefs);
+		COMMENT_SNOB.setJSONPref("rulePrefs", prefs);
 	}
 }
 
@@ -133,7 +133,7 @@ function useDefaultChange() {
 	
 	if (ruleId && useDefaultCheckbox.is(':checked')) {
 		$("#custom-preferences").css("visibility", "hidden");
-		EXTENSION.removeRulePrefs(ruleId);
+		COMMENT_SNOB.removeRulePrefs(ruleId);
 	}
 	else {
 		$("#custom-preferences").css("visibility", "visible");
@@ -147,12 +147,6 @@ function useDefaultChange() {
 addEventListener( "load", function () {
 	removeEventListener( "load", arguments.callee, false );
 	
-	// Localize the document.
-	prepareStrings(function () {
-		EXTENSION.localize(document);
-		document.title = __("options_page_title");
-	});
-	
 	// Instant-apply any preference changes.
 	$(".preference").on( "click change", function () {
 		save();
@@ -162,7 +156,7 @@ addEventListener( "load", function () {
 
 	$("#remove").click(function () {
 		if (confirm("Are you sure?")) {
-			EXTENSION.removeRule($(this).attr("ruleid"));
+			COMMENT_SNOB.removeRule($(this).attr("ruleid"));
 			populateRuleList();
 		}
 	});
@@ -172,7 +166,7 @@ addEventListener( "load", function () {
 		
 		var rule = $("#add-rule").val();
 		
-		rule = minify(rule);
+		rule = COMMENT_SNOB.minify(rule);
 		
 		try {
 			var jsonRule = JSON.parse(rule);
@@ -181,7 +175,7 @@ addEventListener( "load", function () {
 			return;
 		}
 		
-		var rv = EXTENSION.addRule(jsonRule);
+		var rv = COMMENT_SNOB.addRule(jsonRule);
 		
 		if (!rv.status) {
 			$("#rule-error").text(rv.msg).show();
@@ -214,7 +208,7 @@ addEventListener( "load", function () {
 	$("#install-youtube").on( "click", function (e) {
 		e.preventDefault();
 		
-		EXTENSION.addRule(EXTENSION.youtubeRule);
+		COMMENT_SNOB.addRule(COMMENT_SNOB.youtubeRule);
 		populateRuleList();
 		$(".user-rule[ruleid='youtube@chrisfinke.com']").click();
 	});

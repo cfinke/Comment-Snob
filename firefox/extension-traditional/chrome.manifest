@@ -1,0 +1,7 @@
+content comment-snob                              chrome/content/       contentaccessible=yes
+content comment-snob-default-locale               chrome/locale/en-US/
+
+skin    comment-snob classic                      chrome/skin/
+locale  comment-snob en-US                        chrome/locale/en-US/
+
+overlay chrome://browser/content/browser.xul         chrome://comment-snob/content/overlay.xul

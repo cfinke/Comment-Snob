@@ -1,0 +1,32 @@
+<!ENTITY comment_snob.extName "Comment Snob">
+<!ENTITY comment_snob.extDescription "Filters out undesirable comments from the Web.">
+<!ENTITY comment_snob.action_save "Save">
+<!ENTITY comment_snob.options_page_title "Comment Snob Options">
+<!ENTITY comment_snob.label_site "Site:">
+<!ENTITY comment_snob.label_hide_all "Hide all comments">
+<!ENTITY comment_snob.label_hide_no_capital "Hide comments that have no capital letters.">
+<!ENTITY comment_snob.label_hide_only_capital "Hide comments that have only capital letters.">
+<!ENTITY comment_snob.label_hide_start_lower "Hide comments that do not start with a capital letter.">
+<!ENTITY comment_snob.label_hide_too_much_punctuation "Hide comments that have excessive punctuation. (!!!!! ?????)">
+<!ENTITY comment_snob.label_hide_too_much_capitalization "Hide comments that have excessive capitalization.">
+<!ENTITY comment_snob.label_hide_too_much_profanity "Hide comments that include profanity.">
+<!ENTITY comment_snob.label_hide_spelling "Hide comments with at least this many spelling mistakes. (Set to zero to disable spellchecking.)">
+<!ENTITY comment_snob.label_dictionary "Dictionary locale code">
+<!ENTITY comment_snob.label_use_default "Use the default filtering preferences">
+<!ENTITY comment_snob.reason_no_capital "No capital letters">
+<!ENTITY comment_snob.reason_only_capital "All capital letters">
+<!ENTITY comment_snob.reason_start_lower "Doesn't start with a capital letter">
+<!ENTITY comment_snob.reason_too_much_punctuation "Excessive punctuation">
+<!ENTITY comment_snob.reason_too_much_capitalization "Excessive capitalization">
+<!ENTITY comment_snob.reason_too_much_profanity "Profanity">
+<!ENTITY comment_snob.reason_keywords "Contains a banned phrase or keyword">
+<!ENTITY comment_snob.reason_spelling "Too many spelling mistakes">
+<!ENTITY comment_snob.option_default "(Default)">
+<!ENTITY comment_snob.action_remove "Remove This Rule">
+<!ENTITY comment_snob.label_hide_keywords "Contains one of these keywords or phrases:">
+<!ENTITY comment_snob.text_keywords_instructions "Separate keywords with spaces. To include a phrase, surround it with double quotes. Regular expressions are allowed.">
+<!ENTITY comment_snob.filteringRules "Filtering Rules">
+<!ENTITY comment_snob.ruleManagement "Rule Management">
+<!ENTITY comment_snob.preferences "Preferences">
+<!ENTITY comment_snob.filteringPreferences "Filtering Preferences">
+<!ENTITY comment_snob.action_add "Add a new rule">

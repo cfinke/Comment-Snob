@@ -1,35 +1,39 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
-<?xml-stylesheet href="chrome://comment-snob/content/skin/firefox-preferences-page.css" type="text/css"?>
+<?xml-stylesheet href="chrome://comment-snob/skin/firefox-preferences-page.css" type="text/css"?>
+<!DOCTYPE overlay [
+	<!ENTITY % localLocale SYSTEM "chrome://comment-snob/locale/locale.dtd">
+	%localLocale;
+	<!ENTITY % backupLocale SYSTEM "chrome://comment-snob-default-locale/content/locale.dtd">
+	%backupLocale;
+]>
 <prefwindow
 	title="Comment Snob - Options"
 	buttons="accept"
 	id="comment-snob-options"
 	style="min-width: 900px; min-height: 600px; overflow: scroll;"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-	<script src="chrome://comment-snob/content/bootstrap-lib.js" type="application/x-javascript"></script>
-	<script src="chrome://comment-snob/content/extension.js" type="application/x-javascript"></script>
-	<script src="chrome://comment-snob/content/minify.js" type="application/x-javascript"></script>
+	<script src="chrome://comment-snob/content/overlay.js" type="application/x-javascript"></script>
 	<prefpane flex="1" id="all-prefs">
 		<hbox id="main-content" flex="1">
 			<vbox id="navbar-container" pack="start" flex="1">
-				<label class="header">Comment Snob</label>
-				<label class="settings-subtitle">Filtering Rules</label>
-				<label id="default-rule" class="navbar-item navbar-item-selected" pagename="rule" data-key="option_default"></label>
-				<label class="navbar-item" id="add" pagename="add" data-key="action_add"></label>
+				<label class="header">&comment_snob.extName;</label>
+				<label class="settings-subtitle">&comment_snob.filteringRules;</label>
+				<label id="default-rule" class="navbar-item navbar-item-selected" pagename="rule">&comment_snob.option_default;</label>
+				<label class="navbar-item" id="add" pagename="add">&comment_snob.action_add;</label>
 			</vbox>
 			<vbox id="mainview" flex="5">
 				<vbox id="mainview-content" flex="1">
 					<vbox id="rulePage" class="page" flex="1">
-						<label class="header">Preferences</label>
+						<label class="header">&comment_snob.preferences;</label>
 						
 						<hbox class="section" id="rule-management" flex="1">
 							<vbox flex="1">
-								<label class="subheader">Rule Management</label>
+								<label class="subheader">&comment_snob.ruleManagement;</label>
 							</vbox>
 							<hbox flex="5">
 								<vbox>
-									<button id="remove" data-key-label="action_remove" />
+									<button id="remove" label="&comment_snob.action_remove;" />
 									<spacer flex="1" />
 								</vbox>
 								<spacer flex="1" />
@@ -38,33 +42,37 @@
 
 						<hbox class="section" flex="1">
 							<vbox flex="1">
-								<label class="subheader">Filtering Preferences</label>
+								<label class="subheader">&comment_snob.filteringPreferences;</label>
 							</vbox>
 							
 							<vbox flex="5">
 								<vbox id="default-preferences">
-									<checkbox id="use-default" label="Use the default filtering preferences" />
+									<checkbox id="use-default" label="&comment_snob.label_use_default;" />
 								</vbox>
 								<vbox id="custom-preferences">
 									<vbox class="section">
-										<checkbox preference="extreme" class="preference-bool preference" id="extreme" data-key-label="label_hide_all" />
+										<checkbox pref="extreme" class="preference-bool preference" id="extreme" label="&comment_snob.label_hide_all;" />
 									</vbox>
 									<hbox align="center">
-										<textbox size="2" min="0" preference="mistakes" class="preference-int preference" />
-										<label data-key="label_hide_spelling"></label>
+										<textbox size="2" min="0" pref="mistakes" class="preference-int preference" />
+										<label>&comment_snob.label_hide_spelling;</label>
 									</hbox>
-									<checkbox preference="nocaps" class="preference-bool preference" data-key-label="label_hide_no_capital"/>
-									<checkbox preference="allcaps" class="preference-bool preference" data-key-label="label_hide_only_capital"/>
-									<checkbox preference="startsWithCapital" class="preference-bool preference" data-key-label="label_hide_start_lower"/>
-									<checkbox preference="punctuation" class="preference-bool preference" data-key-label="label_hide_too_much_punctuation"/>
-									<checkbox preference="excessiveCapitals" class="preference-bool preference" data-key-label="label_hide_too_much_capitalization"/>
-									<checkbox preference="profanity" class="preference-bool preference" data-key-label="label_hide_too_much_profanity"/>
+									<checkbox pref="nocaps" class="preference-bool preference" label="&comment_snob.label_hide_no_capital;"/>
+									<checkbox pref="allcaps" class="preference-bool preference" label="&comment_snob.label_hide_only_capital;"/>
+									<checkbox pref="startsWithCapital" class="preference-bool preference" label="&comment_snob.label_hide_start_lower;"/>
+									<checkbox pref="punctuation" class="preference-bool preference" label="&comment_snob.label_hide_too_much_punctuation;"/>
+									<checkbox pref="excessiveCapitals" class="preference-bool preference" label="&comment_snob.label_hide_too_much_capitalization;"/>
+									<checkbox pref="profanity" class="preference-bool preference" label="&comment_snob.label_hide_too_much_profanity;"/>
+									<hbox align="center">
+										<textbox size="5" min="0" pref="dictionary" class="preference-text preference" />
+										<label>&comment_snob.label_dictionary;</label>
+									</hbox>
 									<vbox>
 										<hbox align="center">
-											<label data-key="label_hide_keywords" />
-											<textbox preference="keywords" class="preference-text preference" size="40" />
+											<label>&comment_snob.label_hide_keywords;</label>
+											<textbox pref="keywords" class="preference-text preference" size="40" />
 										</hbox>
-										<label class="footnote" data-key="text_keywords_instructions" />
+										<label class="footnote">&comment_snob.text_keywords_instructions;</label>
 									</vbox>
 								</vbox>
 							</vbox>
