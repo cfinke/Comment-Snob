@@ -418,7 +418,7 @@ var COMMENT_SNOB = {
 						text = text.replace(/\s+|[^a-z0-9\-']/img, " "); //'
 						text = COMMENT_SNOB.$.trim(text);
 
-						words = text.split(" ");
+						var words = text.split(" ");
 
 						for (var j = 0, _jlen = words.length; j < _jlen; j++){
 							var word = words[j];
