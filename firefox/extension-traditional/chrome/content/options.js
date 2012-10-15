@@ -1,7 +1,13 @@
+Components.utils.import("resource://comment-snob-modules/comment-snob-minify.js");
+Components.utils.import("resource://comment-snob-modules/comment-snob-util.js");
+Components.utils.import("resource://comment-snob-modules/comment-snob-updater.js");
+
+var currentRuleID = null;
+
 function populateRuleList() {
 	$( "#navbar-container label.user-rule" ).remove();
 	
-	var rules = COMMENT_SNOB.getJSONPref("rules", {});
+	var rules = COMMENT_SNOB_UTIL.getJSONPref("rules", {});
 	
 	for (var i in rules) {
 		var option = $( '<label/>' );
@@ -25,7 +31,7 @@ function populateRuleList() {
 }
 
 function showRuleSettings(ruleId) {
-	var prefs = COMMENT_SNOB.getJSONPref("rulePrefs", {});
+	var prefs = COMMENT_SNOB_UTIL.getJSONPref("rulePrefs", {});
 	
 	var customPrefs = false;
 	
@@ -34,7 +40,7 @@ function showRuleSettings(ruleId) {
 		customPrefs = true;
 	}
 	else {
-		var rulePrefs = COMMENT_SNOB.defaultPrefs;
+		var rulePrefs = COMMENT_SNOB_UTIL.defaultPrefs;
 	}
 	
 	$(".preference-bool").each(function () {
@@ -54,9 +60,9 @@ function showRuleSettings(ruleId) {
 	setDisabled();
 	
 	if (ruleId) {
+		currentRuleID = ruleId;
 		$("#rule-management").show();
 		$("#default-preferences").show();
-		$("#remove").attr("ruleid", ruleId);
 		
 		if (!customPrefs) {
 			$("#use-default").each(function () { this.checked = true; });
@@ -66,9 +72,12 @@ function showRuleSettings(ruleId) {
 		}
 	}
 	else {
+		currentRuleID = null;
 		$("#rule-management").hide();
 		$("#default-preferences").hide();
 	}
+	
+	$( '#update-progress' ).text( '' );
 	
 	useDefaultChange();
 }
@@ -89,19 +98,17 @@ function setDisabled() {
 }
 
 function save() {
-	var ruleId = $(".navbar-item-selected:first").attr("ruleid");
-	
-	if (!ruleId) {
+	if (!currentRuleID) {
 		$(".preference-bool").each(function () {
-			COMMENT_SNOB.prefs.setBoolPref($(this).attr("pref"), $(this).is(":checked"));
+			COMMENT_SNOB_UTIL.prefs.setBoolPref($(this).attr("pref"), $(this).is(":checked"));
 		});
 		
 		$(".preference-int").each(function () {
-			COMMENT_SNOB.prefs.setIntPref($(this).attr("pref"), $(this).val());
+			COMMENT_SNOB_UTIL.prefs.setIntPref($(this).attr("pref"), $(this).val());
 		});
 
 		$(".preference-text").each(function () {
-			COMMENT_SNOB.prefs.setCharPref($(this).attr("pref"), $(this).val());
+			COMMENT_SNOB_UTIL.prefs.setCharPref($(this).attr("pref"), $(this).val());
 		});
 	}
 	else {
@@ -119,26 +126,24 @@ function save() {
 			prefObject[$(this).attr("pref")] = $(this).val();
 		});
 
-		var prefs = COMMENT_SNOB.getJSONPref("rulePrefs", {});
-		prefs[ruleId] = prefObject;
+		var prefs = COMMENT_SNOB_UTIL.getJSONPref("rulePrefs", {});
+		prefs[currentRuleID] = prefObject;
 
-		COMMENT_SNOB.setJSONPref("rulePrefs", prefs);
+		COMMENT_SNOB_UTIL.setJSONPref("rulePrefs", prefs);
 	}
 }
 
 function useDefaultChange() {
 	var useDefaultCheckbox = $('#use-default');
 	
-	var ruleId = $(".navbar-item-selected:first").attr("ruleid");
-	
-	if (ruleId && useDefaultCheckbox.is(':checked')) {
+	if (currentRuleID && useDefaultCheckbox.is(':checked')) {
 		$("#custom-preferences").css("visibility", "hidden");
-		COMMENT_SNOB.removeRulePrefs(ruleId);
+		COMMENT_SNOB_UTIL.removeRulePrefs(currentRuleID);
 	}
 	else {
 		$("#custom-preferences").css("visibility", "visible");
 	
-		if (ruleId) {
+		if (currentRuleID) {
 			save();
 		}
 	}
@@ -148,7 +153,7 @@ addEventListener( "load", function () {
 	removeEventListener( "load", arguments.callee, false );
 	
 	// Instant-apply any preference changes.
-	$(".preference").on( "click change", function () {
+	$(".preference").on( "click change blur keyup", function () {
 		save();
 	});
 
@@ -156,8 +161,69 @@ addEventListener( "load", function () {
 
 	$("#remove").click(function () {
 		if (confirm("Are you sure?")) {
-			COMMENT_SNOB.removeRule($(this).attr("ruleid"));
+			COMMENT_SNOB_UTIL.removeRule( currentRuleID );
 			populateRuleList();
+		}
+	});
+	
+	$("#update").click( function () {
+		var progressContainer = $( '#update-progress' );
+		progressContainer.text( '' );
+		
+		progressContainer.append(
+			$( '<description/>' ).text( COMMENT_SNOB.strings.getString( 'label_updating' ) )
+		).show();
+		
+		var rules = COMMENT_SNOB_UTIL.getJSONPref( "rules", {} );
+		
+		if ( currentRuleID in rules ) {
+			var currentRule = rules[ currentRuleID ];
+			
+			COMMENT_SNOB_UPDATER.updateRule( currentRule, function ( rv ) {
+				if ( rv.status ) {
+					if ( JSON.stringify( rv.rule ) == JSON.stringify( currentRule ) ) {
+						progressContainer.append(
+							$( '<description/>' ).text( COMMENT_SNOB.strings.getString( 'label_up_to_date' ) )
+						);
+					}
+					else {
+						progressContainer.append(
+							$( '<description/>' ).text( COMMENT_SNOB.strings.getString( 'label_updated' ) )
+						);
+					}
+				}
+				else if ( rv.msg ) {
+					if ( 'msgArgs' in rv ) {
+						progressContainer.append(
+							$( '<description/>' ).text( COMMENT_SNOB.strings.getFormattedString( rv.msg, rv.msgArgs ) )
+						);
+					}
+					else {
+						progressContainer.append(
+							$( '<description/>' ).text( COMMENT_SNOB.strings.getString( rv.msg ) )
+						);
+					}
+					
+					if ( "msgDebug" in rv ) {
+						var debug = $( '<textbox/>' );
+						debug.attr( 'multiline', 'true' );
+						debug.attr( 'rows', '8' );
+						debug.attr( 'cols', '80' );
+						debug.attr( 'value', rv.msgDebug );
+						progressContainer.append( debug );
+					}
+				}
+				else {
+					progressContainer.append(
+						$( '<description/>' ).text( COMMENT_SNOB.strings.getString( 'label_update_error' ) )
+					);
+				}
+			} );
+		}
+		else {
+			progressContainer.append(
+				$( '<description/>' ).text( COMMENT_SNOB.strings.getString( 'label_update_error' ) )
+			);
 		}
 	});
 	
@@ -166,23 +232,14 @@ addEventListener( "load", function () {
 		
 		var rule = $("#add-rule").val();
 		
-		rule = COMMENT_SNOB.minify(rule);
-		
-		try {
-			var jsonRule = JSON.parse(rule);
-		} catch (e) {
-			$("#rule-error").text("Invalid JSON: " + e).show();
-			return;
-		}
-		
-		var rv = COMMENT_SNOB.addRule(jsonRule);
+		var rv = COMMENT_SNOB_UTIL.addRule( rule );
 		
 		if (!rv.status) {
 			$("#rule-error").text(rv.msg).show();
 		}
 		else {
 			populateRuleList();
-			$("#navbar-container label[ruleid='" + jsonRule.id + "']").click();
+			$("#navbar-container label[ruleid='" + rv.rule.id + "']").click();
 			$("#add-rule").val("");
 		}
 	});
@@ -208,7 +265,7 @@ addEventListener( "load", function () {
 	$("#install-youtube").on( "click", function (e) {
 		e.preventDefault();
 		
-		COMMENT_SNOB.addRule(COMMENT_SNOB.youtubeRule);
+		COMMENT_SNOB_UTIL.addRule(COMMENT_SNOB_UTIL.youtubeRule);
 		populateRuleList();
 		$(".user-rule[ruleid='youtube@chrisfinke.com']").click();
 	});

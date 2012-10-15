@@ -23,6 +23,7 @@
 <!ENTITY comment_snob.reason_spelling "Too many spelling mistakes">
 <!ENTITY comment_snob.option_default "(Default)">
 <!ENTITY comment_snob.action_remove "Remove This Rule">
+<!ENTITY comment_snob.action_update "Check for Updates">
 <!ENTITY comment_snob.label_hide_keywords "Contains one of these keywords or phrases:">
 <!ENTITY comment_snob.text_keywords_instructions "Separate keywords with spaces. To include a phrase, surround it with double quotes. Regular expressions are allowed.">
 <!ENTITY comment_snob.filteringRules "Filtering Rules">
@@ -30,3 +31,5 @@
 <!ENTITY comment_snob.preferences "Preferences">
 <!ENTITY comment_snob.filteringPreferences "Filtering Preferences">
 <!ENTITY comment_snob.action_add "Add a new rule">
+<!ENTITY comment_snob.new_rule_header "Add a New Rule">
+<!ENTITY comment_snob.reinstall_youtube "Reinstall the default YouTube rule">

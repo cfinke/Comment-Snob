@@ -8,11 +8,15 @@
 	%backupLocale;
 ]>
 <prefwindow
-	title="Comment Snob - Options"
+	title="&comment_snob.options_page_title;"
 	buttons="accept"
 	id="comment-snob-options"
 	style="min-width: 900px; min-height: 600px; overflow: scroll;"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<stringbundleset id="stringbundleset">
+		<stringbundle id="comment-snob-backup-string-bundle" src="chrome://comment-snob-default-locale/content/locale.properties" />
+		<stringbundle id="comment-snob-string-bundle" src="chrome://comment-snob/locale/locale.properties" />
+	</stringbundleset>
 	<script src="chrome://comment-snob/content/overlay.js" type="application/x-javascript"></script>
 	<prefpane flex="1" id="all-prefs">
 		<hbox id="main-content" flex="1">
@@ -33,8 +37,13 @@
 							</vbox>
 							<hbox flex="5">
 								<vbox>
-									<button id="remove" label="&comment_snob.action_remove;" />
+									<hbox>
+										<button id="update" label="&comment_snob.action_update;" />
+										<button id="remove" label="&comment_snob.action_remove;" />
+										<spacer flex="1" />
+									</hbox>
 									<spacer flex="1" />
+									<vbox id="update-progress"></vbox>
 								</vbox>
 								<spacer flex="1" />
 							</hbox>
@@ -79,7 +88,7 @@
 						</hbox>
 					</vbox>
 					<vbox id="addPage" class="page" style="display: none;" flex="1">
-						<label class="header">Add a New Rule</label>
+						<label class="header">&comment_snob.new_rule_header;</label>
 						<description>Add your own rule below, or visit <label class="text-link" href="http://www.chrisfinke.com/comment-snob/">the Comment Snob homepage</label> for links to more rules.</description>
 						<description>For instructions on writing Comment Snob rules, see <label class="text-link" href="http://www.chrisfinke.com/comment-snob/#howto">this tutorial</label>.</description>
 						<description id="rule-error" style="display: none;"></description>
@@ -95,7 +104,7 @@
 						</vbox>
 						<vbox class="section">
 							<description id="reinstall-youtube">
-								(You can re-install the default YouTube rule by clicking <label class="text-link" href="javascript:void(0);" id="install-youtube">here</label>.)
+								<label class="text-link" href="javascript:void(0);" id="install-youtube">&comment_snob.reinstall_youtube;</label>
 							</description>
 						</vbox>
 					</vbox>

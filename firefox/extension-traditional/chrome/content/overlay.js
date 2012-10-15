@@ -49,62 +49,11 @@ var COMMENT_SNOB = {
 		}
 	},
 	
-	youtubeRule : {
-		"id": "youtube@chrisfinke.com",
-		"label": "YouTube",
-		"url": "^http://www\\.youtube\\.com/.*$",
-		"allCommentsSelector": "#comments-view",
-		"commentContainerSelector": "li.comment",
-		"commentTextSelector": "div.comment-text",
-		"commentHideSelector": "> div",
-		"statusElementTag": "div",
-		"statusElementAttributes": {
-			"class": "content",
-			"style": "color: #666;"
-		},
-		"ajaxInitiatorSelector": ".comments-pagination button, .comments-pagination a, .comments-pagination button > span",
-		"updateURL": "http://www.chrisfinke.com/comment-snob/rules/youtube.snob"
-	},
-	
-	get defaultPrefs() {
-		return {
-			"allcaps" : COMMENT_SNOB.prefs.getBoolPref("allcaps"),
-			"nocaps" : COMMENT_SNOB.prefs.getBoolPref("nocaps"),
-			"punctuation" : COMMENT_SNOB.prefs.getBoolPref("punctuation"),
-			"startsWithCapital" : COMMENT_SNOB.prefs.getBoolPref("startsWithCapital"),
-			"excessiveCapitals" : COMMENT_SNOB.prefs.getBoolPref("excessiveCapitals"),
-			"profanity" : COMMENT_SNOB.prefs.getBoolPref("profanity"),
-			"extreme" : COMMENT_SNOB.prefs.getBoolPref("extreme"),
-			"mistakes" : COMMENT_SNOB.prefs.getIntPref("mistakes"),
-			"keywords" : COMMENT_SNOB.prefs.getCharPref("keywords"),
-			"dictionary" : COMMENT_SNOB.prefs.getCharPref("dictionary")
-		};
-	},
-	
-	prefs : Components.classes["@mozilla.org/preferences-service;1"].getService( Components.interfaces.nsIPrefService ).getBranch( "extensions.youtube-comment-snob." ),
-
-	getJSONPref : function (prefName, defaultValue) {
-		var rv = COMMENT_SNOB.prefs.getCharPref(prefName);
-
-		if (!rv) {
-			return defaultValue;
-		}
-		else {
-			return JSON.parse(rv);
-		}
-	},
-	
-	setJSONPref : function (prefName, prefVal) {
-		var stringPrefVal = JSON.stringify(prefVal);
-
-		COMMENT_SNOB.prefs.setCharPref(prefName, stringPrefVal);
-	},
-
 	load : function () {
-		if (COMMENT_SNOB.prefs.getBoolPref("firstrun")) {
+		if (COMMENT_SNOB_UTIL.prefs.getBoolPref("firstrun")) {
 			// Add the YouTube rule.
-			COMMENT_SNOB.addRule(COMMENT_SNOB.youtubeRule);
-			COMMENT_SNOB.prefs.setBoolPref("firstrun", false);
+			COMMENT_SNOB_UTIL.addRule(COMMENT_SNOB_UTIL.youtubeRule);
+			COMMENT_SNOB_UTIL.prefs.setBoolPref("firstrun", false);
 		}
 		
 		COMMENT_SNOB.loadDictionary();
@@ -121,8 +70,6 @@ var COMMENT_SNOB = {
 		
 		Components.classes["@mozilla.org/moz/jssubscript-loader;1"].getService(Components.interfaces.mozIJSSubScriptLoader).loadSubScript('chrome://comment-snob/content/jquery-1.7.2.min.js');
 		COMMENT_SNOB.$ = window.$.noConflict( true );
-		
-		Components.classes["@mozilla.org/moz/jssubscript-loader;1"].getService(Components.interfaces.mozIJSSubScriptLoader).loadSubScript('chrome://comment-snob/content/minify.js', COMMENT_SNOB);
 	},
 	
 	unload : function () {
@@ -140,12 +87,16 @@ var COMMENT_SNOB = {
 	},
 	
 	contentClick : function (e) {
-		if (e.originalTarget.getAttribute("href") && e.originalTarget.getAttribute('href').match(/\.snob(\?.*)?$/i)) {
-			e.preventDefault();
+		if ( e.button == 0 && ! e.metaKey && ! e.shiftKey && e.originalTarget.getAttribute("href") ) {
+			var href = e.originalTarget.getAttribute('href');
 			
-			COMMENT_SNOB.showInstallBar(
-				{ href : e.originalTarget.getAttribute('href') }
-			);
+			if ( href.indexOf("data:text/snob+json") === 0 || href.match(/\.snob(\?.*)?$/i) ) {
+				e.preventDefault();
+			
+				COMMENT_SNOB.showInstallBar(
+					{ href : e.originalTarget.getAttribute('href') }
+				);
+			}
 		}
 	},
 	
@@ -163,7 +114,7 @@ var COMMENT_SNOB = {
 		var spellchecker = Components.classes[spellclass].createInstance(Components.interfaces.mozISpellCheckingEngine);
 		
 		try {
-			spellchecker.dictionary = COMMENT_SNOB.prefs.getCharPref("dictionary");
+			spellchecker.dictionary = COMMENT_SNOB_UTIL.prefs.getCharPref("dictionary");
 			this.dictionary = spellchecker;
 		} catch (e) {
 			// Dictionary not available.
@@ -171,68 +122,14 @@ var COMMENT_SNOB = {
 		}
 	},
 	
-	addRule : function (rule) {
-		var rv = { "status" : true };
-		
-		var required_parameters = [ "id", "label", "url", "allCommentsSelector", "commentContainerSelector" ];
-		
-		for (var i = 0, _len = required_parameters.length; i < _len; i++) {
-			if (!(required_parameters[i] in rule)) {
-				rv.status = false;
-				rv.msg = "Rule is missing '" + required_parameters[i] + "' attribute.";
-				return rv;
-			}
-		}
-		
-		var rules = COMMENT_SNOB.getJSONPref("rules", {});
-		rules[rule.id] = rule;
-		
-		COMMENT_SNOB.setJSONPref("rules", rules);
-		
-		return rv;
-	},
-	
-	removeRule : function (ruleId) {
-		var rules = COMMENT_SNOB.getJSONPref("rules", {});
-		
-		if (ruleId in rules) {
-			delete rules[ruleId];
-			COMMENT_SNOB.setJSONPref("rules", rules);
-		}
-		
-		COMMENT_SNOB.removeRulePrefs(ruleId);
-	},
-	
-	getAllRulePrefs : function () {
-		return COMMENT_SNOB.getJSONPref("rulePrefs", {});
-	},
-	
-	getRulePrefs : function (ruleId) {
-		var prefs = COMMENT_SNOB.getJSONPref("rulePrefs", {});
-		
-		if (!(ruleId in prefs)) {
-			return COMMENT_SNOB.defaultPrefs;
-		}
-		else {
-			return prefs[ruleId];
-		}
-	},
-	
-	removeRulePrefs : function (ruleId) {
-		var prefs = COMMENT_SNOB.getJSONPref("rulePrefs", {});
-		
-		if (ruleId in prefs) {
-			delete prefs[ruleId];
-			COMMENT_SNOB.setJSONPref("rulePrefs", prefs);
-		}
-	},
-	
 	contentChange : function () {
 		var page = content.document;
 
+		COMMENT_SNOB.hideInstallBar();
+
 		// Check if this page is a comment snob rule.
 		if (page.location.href.match(/\.snob(\?.*)?$/i)) {
-			var rule = COMMENT_SNOB.minify( page.body.textContent );
+			var rule = COMMENT_SNOB_MINIFY( page.body.textContent );
 
 			try {
 				var jsonRule = JSON.parse(rule);
@@ -246,7 +143,7 @@ var COMMENT_SNOB = {
 		}
 
 		// Filter any comments.
-		var rules = COMMENT_SNOB.getJSONPref("rules", {});
+		var rules = COMMENT_SNOB_UTIL.getJSONPref("rules", {});
 
 		for (var i in rules) {
 			var theRule = rules[i];
@@ -294,7 +191,7 @@ var COMMENT_SNOB = {
 		
 		var theRule = page.commentSnobRule;
 		
-		var prefs = COMMENT_SNOB.getRulePrefs(theRule.id);
+		var prefs = COMMENT_SNOB_UTIL.getRulePrefs(theRule.id);
 
 		var allComments = COMMENT_SNOB.$(theRule.allCommentsSelector, page);
 
@@ -640,27 +537,9 @@ var COMMENT_SNOB = {
 							label : 'Yes',
 							callback : function () {
 								if ("rule" in rule) {
-									var rules = COMMENT_SNOB.getJSONPref("rules", {});
-									rules[rule.rule.id] = rule.rule;
-									COMMENT_SNOB.setJSONPref("rules", rules);
+									COMMENT_SNOB_UTIL.addRule( rule.rule );
 								}
 								else {
-									function handleText(text) {
-										var text = COMMENT_SNOB.minify(text);
-
-										try {
-											var json = JSON.parse(text);
-										} catch (e) {
-											return;
-										}
-
-										var rules = COMMENT_SNOB.getJSONPref("rules", {});
-										rules[json.id] = json;
-										COMMENT_SNOB.setJSONPref("rules", rules);
-
-										COMMENT_SNOB.addRule(json);
-									}
-
 									if (rule.href.indexOf("data:") === 0) {
 										var parts = rule.href.split(";");
 
@@ -670,8 +549,8 @@ var COMMENT_SNOB = {
 										else {
 											var text = decodeURIComponent(parts[1].replace(/\+/g, " "));
 										}
-
-										handleText(text);
+										
+										COMMENT_SNOB_UTIL.addRule(text);
 									}
 									else {
 										var req = new XMLHttpRequest();
@@ -679,8 +558,7 @@ var COMMENT_SNOB = {
 
 										req.onreadystatechange = function () {
 											if (req.readyState == 4) {
-												var text = req.responseText;
-												handleText(text);
+												COMMENT_SNOB_UTIL.addRule( req.responseText );
 											}
 										};
 

@@ -11,3 +11,4 @@ pref("extensions.youtube-comment-snob.dictionary", "en-US");
 pref("extensions.youtube-comment-snob.keywords", "");
 pref("extensions.youtube-comment-snob.rules", "{}");
 pref("extensions.youtube-comment-snob.rulePrefs", "{}");
+pref("extensions.youtube-comment-snob.lastRuleUpdate", "0");
