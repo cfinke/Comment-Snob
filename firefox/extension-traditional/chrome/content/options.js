@@ -40,7 +40,7 @@ var COMMENT_SNOB_OPTIONS = {
 	/**
 	 * Show the filtering preferences for a given rule.
 	 *
-	 * @arg string ruleId
+	 * @param string ruleId
 	 */
 	showRuleSettings : function ( ruleId ) {
 		var prefs = COMMENT_SNOB_UTIL.prefs.getJSONPref("rulePrefs", {});

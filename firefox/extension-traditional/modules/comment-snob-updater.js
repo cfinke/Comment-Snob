@@ -45,6 +45,10 @@ var COMMENT_SNOB_UPDATER = {
 		}
 	},
 	
+	/**
+	 * Call each of the update rules' updateURLs, replacing the rule with
+	 * the new one if it has changed.
+	 */
 	updateRules : function () {
 		COMMENT_SNOB_UPDATER.clearTimeout( COMMENT_SNOB_UPDATER.updateTimer );
 		COMMENT_SNOB_UPDATER.updateTimer = COMMENT_SNOB_UPDATER.setTimeout(COMMENT_SNOB_UPDATER.updateRules, 1000 * 60 * 60 * 24 * 3);
@@ -58,6 +62,12 @@ var COMMENT_SNOB_UPDATER = {
 		}
 	},
 	
+	/**
+	 * Update a single filtering rule.
+	 *
+	 * @param object rule
+	 * @param function callback
+	 */
 	updateRule : function ( rule, callback ) {
 		var req = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance(Components.interfaces.nsIXMLHttpRequest);
 		req.open( "GET", rule.updateURL, true );
@@ -67,6 +77,7 @@ var COMMENT_SNOB_UPDATER = {
 				var text = req.responseText;
 
 				if ( ! text ) {
+					// Empty response.
 					if ( callback ) {
 						callback( { status : false } );
 					}
@@ -79,6 +90,7 @@ var COMMENT_SNOB_UPDATER = {
 				try {
 					var json = JSON.parse( text );
 				} catch ( ex ) {
+					// Invalid JSON.
 					if ( callback ) {
 						callback( { status : false, msg : 'invalid_rule', msgDebug : [ text ] } );
 					}
@@ -86,23 +98,19 @@ var COMMENT_SNOB_UPDATER = {
 					return;
 				}
 				
-				if ( ! json ) {
-					if ( callback ) {
-						callback ( { status : false } );
-					}
+				if ( "id" in json && json.id == rule.id ) {
+					var rv = COMMENT_SNOB_UTIL.addRule( json );
+					
+					if ( callback )
+						callback( rv );
 					
 					return;
 				}
-				
-				if ( json.id == rule.id ) {
-					COMMENT_SNOB_UTIL.addRule( json );
-					
-					if ( callback ) {
-						callback( { status : true, rule : json } );
-					}
-				}
 				else if ( callback ) {
+					// The ID of the returned rule didn't match the rule we're updating.
 					callback ( { status : false, msg : 'invalid_rule_id' } );
+					
+					return;
 				}
 			}
 		};

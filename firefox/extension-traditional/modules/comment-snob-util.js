@@ -58,6 +58,12 @@ var COMMENT_SNOB_UTIL = {
 		};
 	},
 	
+	/**
+	 * Saves a rule and activates it.
+	 *
+	 * @param object|string rule
+	 * @returns object { status : boolean, ... }
+	 */
 	addRule : function (rule) {
 		var rv = { "status" : false };
 
@@ -79,16 +85,8 @@ var COMMENT_SNOB_UTIL = {
 			return rv;
 		}
 		
-		var required_parameters = [ "id", "label", "url", "allCommentsSelector", "commentContainerSelector" ];
-		
-		for (var i = 0, _len = required_parameters.length; i < _len; i++) {
-			if (!(required_parameters[i] in rule)) {
-				rv.status = false;
-				rv.msg = 'missing_attribute';
-				rv.msgArgs = [ required_parameters[i] ];
-				return rv;
-			}
-		}
+		var ruleValidation = COMMENT_SNOB_UTIL.validateRule( rule );
+		if ( ! ruleValidation.status ) return ruleValidation;
 		
 		var rules = COMMENT_SNOB_UTIL.prefs.getJSONPref("rules", {});
 		rules[rule.id] = rule;
@@ -100,6 +98,34 @@ var COMMENT_SNOB_UTIL = {
 		return rv;
 	},
 	
+	/**
+	 * Validates that a rule has all of the required fields.
+	 *
+	 * @param object rule
+	 * @returns object { status : boolean, ... }
+	 */
+	validateRule : function ( rule ) {
+		var required_parameters = [ "id", "label", "url", "allCommentsSelector", "commentContainerSelector" ];
+		
+		var rv = { status : false };
+		
+		for (var i = 0, _len = required_parameters.length; i < _len; i++) {
+			if (!(required_parameters[i] in rule)) {
+				rv.msg = 'missing_attribute';
+				rv.msgArgs = [ required_parameters[i] ];
+				return rv;
+			}
+		}
+		
+		rv.status = true;
+		return rv;
+	},
+	
+	/**
+	 * Removes a rule.
+	 *
+	 * @param string ruleId
+	 */
 	removeRule : function (ruleId) {
 		var rules = COMMENT_SNOB_UTIL.prefs.getJSONPref("rules", {});
 		
@@ -111,6 +137,12 @@ var COMMENT_SNOB_UTIL = {
 		COMMENT_SNOB_UTIL.removeRulePrefs(ruleId);
 	},
 	
+	/**
+	 * Retrieves the filtering preferences for a rule.
+	 *
+	 * @param string ruleId
+	 * @returns object
+	 */
 	getRulePrefs : function (ruleId) {
 		var prefs = COMMENT_SNOB_UTIL.prefs.getJSONPref("rulePrefs", {});
 		
@@ -122,6 +154,11 @@ var COMMENT_SNOB_UTIL = {
 		}
 	},
 	
+	/**
+	 * Removes the filtering preferences for a rule.
+	 *
+	 * @param string ruleId
+	 */
 	removeRulePrefs : function (ruleId) {
 		var prefs = COMMENT_SNOB_UTIL.prefs.getJSONPref("rulePrefs", {});
 		
@@ -131,6 +168,11 @@ var COMMENT_SNOB_UTIL = {
 		}
 	},
 	
+	/**
+	 * Log to the error console.
+	 *
+	 * @param string m
+	 */
 	log : function (m) {
 		var consoleService = Components.classes["@mozilla.org/consoleservice;1"].getService(Components.interfaces.nsIConsoleService);
 		consoleService.logStringMessage("Comment Snob: " + m);

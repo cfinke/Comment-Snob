@@ -1,3 +1,9 @@
+/**
+ * Minify a JSON string. Used for removing comments, line feeds, etc.
+ *
+ * @param string json
+ * @returns string
+ */
 var COMMENT_SNOB_MINIFY = function(json) {
 	var tokenizer = /"|(\/\*)|(\*\/)|(\/\/)|\n|\r/g,
 		in_string = false,
