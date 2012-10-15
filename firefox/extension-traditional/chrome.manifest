@@ -1,6 +1,9 @@
 content comment-snob                              chrome/content/       contentaccessible=yes
 content comment-snob-default-locale               chrome/locale/en-US/
 
+resource    comment-snob-modules             modules/
+
+
 skin    comment-snob classic                      chrome/skin/
 locale  comment-snob en-US                        chrome/locale/en-US/
 
