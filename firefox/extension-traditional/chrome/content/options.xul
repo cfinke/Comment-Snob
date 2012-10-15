@@ -123,20 +123,18 @@
 				removeEventListener( "load", arguments.callee, false );
 
 				// Instant-apply any preference changes.
-				$(".preference").on( "click change blur keyup", function () {
-					COMMENT_SNOB_OPTIONS.save();
-				});
+				$(".preference").on( "click.comment-snob change.comment-snob blur.comment-snob keyup.comment-snob", COMMENT_SNOB_OPTIONS.save );
+				
+				$("#extreme").on( 'click.comment-snob', COMMENT_SNOB_OPTIONS.setDisabled );
 
-				$("#extreme").click( COMMENT_SNOB_OPTIONS.setDisabled );
-
-				$("#remove").click(function () {
+				$("#remove").on( 'click.comment-snob', function () {
 					if (confirm("Are you sure?")) {
 						COMMENT_SNOB_UTIL.removeRule( COMMENT_SNOB_OPTIONS.currentRuleID );
 						COMMENT_SNOB_OPTIONS.populateRuleList();
 					}
 				});
 
-				$("#update").click( function () {
+				$("#update").on( 'click.comment-snob', function () {
 					var progressContainer = $( '#update-progress' );
 					progressContainer.text( '' );
 
@@ -197,7 +195,7 @@
 					}
 				});
 
-				$("#add-finish").click(function () {
+				$("#add-finish").on( 'click.comment-snob', function () {
 					$("#rule-error").hide();
 
 					var rule = $("#add-rule").val();
@@ -240,7 +238,7 @@
 					$(".user-rule[ruleid='youtube@chrisfinke.com']").click();
 				});
 
-				$("#use-default").click(function () {
+				$("#use-default").on( 'click.comment-snob', function () {
 					COMMENT_SNOB_OPTIONS.useDefaultChange();
 				});
 
