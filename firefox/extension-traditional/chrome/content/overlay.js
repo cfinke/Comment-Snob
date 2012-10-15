@@ -86,6 +86,9 @@ var COMMENT_SNOB = {
 		gBrowser.tabContainer.removeEventListener( "TabSelect", COMMENT_SNOB.contentChange, false );
 	},
 	
+	/**
+	 * When the user clicks on a filtering rule link, prompt them to install it.
+	 */
 	contentClick : function (e) {
 		if ( e.button == 0 && ! e.metaKey && ! e.shiftKey && e.originalTarget.getAttribute("href") ) {
 			var href = e.originalTarget.getAttribute('href');

@@ -3,8 +3,14 @@ Components.utils.import("resource://comment-snob-modules/comment-snob-util.js");
 Components.utils.import("resource://comment-snob-modules/comment-snob-updater.js");
 
 var COMMENT_SNOB_OPTIONS = {
+	/**
+	 * The ID of the rule currently being managed.
+	 */
 	currentRuleID : null,
 	
+	/**
+	 * Reset and populate the list of rules in the sidebar.
+	 */
 	populateRuleList : function () {
 		$( "#navbar-container label.user-rule" ).remove();
 	
@@ -31,6 +37,11 @@ var COMMENT_SNOB_OPTIONS = {
 		$( "#default-rule" ).click();
 	},
 
+	/**
+	 * Show the filtering preferences for a given rule.
+	 *
+	 * @arg string ruleId
+	 */
 	showRuleSettings : function ( ruleId ) {
 		var prefs = COMMENT_SNOB_UTIL.prefs.getJSONPref("rulePrefs", {});
 	
@@ -73,6 +84,7 @@ var COMMENT_SNOB_OPTIONS = {
 			}
 		}
 		else {
+			// Show the default filtering rules.
 			COMMENT_SNOB_OPTIONS.currentRuleID = null;
 			$("#rule-management").hide();
 			$("#default-preferences").hide();
@@ -83,6 +95,10 @@ var COMMENT_SNOB_OPTIONS = {
 		COMMENT_SNOB_OPTIONS.useDefaultChange();
 	},
 
+	/**
+	 * Disable the fine-grained filtering preferences if the "Hide all comments" option
+	 * is checked.
+	 */
 	setDisabled : function () {
 		var disabled = $("#extreme").is(":checked");
 
@@ -98,6 +114,9 @@ var COMMENT_SNOB_OPTIONS = {
 		});
 	},
 
+	/**
+	 * Save the current state of all of the preference options.
+	 */
 	save : function () {
 		if (!COMMENT_SNOB_OPTIONS.currentRuleID) {
 			$(".preference-bool").each(function () {
@@ -134,6 +153,9 @@ var COMMENT_SNOB_OPTIONS = {
 		}
 	},
 
+	/**
+	 * Update the UI after a click to the "Use default filtering preferences" checkbox.
+	 */
 	useDefaultChange : function () {
 		var useDefaultCheckbox = $('#use-default');
 	
