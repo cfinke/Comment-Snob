@@ -143,7 +143,7 @@ var COMMENT_SNOB = {
 		}
 
 		// Filter any comments.
-		var rules = COMMENT_SNOB_UTIL.getJSONPref("rules", {});
+		var rules = COMMENT_SNOB_UTIL.prefs.getJSONPref("rules", {});
 
 		for (var i in rules) {
 			var theRule = rules[i];

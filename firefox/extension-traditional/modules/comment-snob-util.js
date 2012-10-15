@@ -18,8 +18,31 @@ var COMMENT_SNOB_UTIL = {
 		"updateURL": "http://www.chrisfinke.com/comment-snob/rules/youtube.snob"
 	},
 	
-	prefs : Components.classes["@mozilla.org/preferences-service;1"].getService( Components.interfaces.nsIPrefService ).getBranch( "extensions.youtube-comment-snob." ),
+	prefs : {
+		_prefs : Components.classes["@mozilla.org/preferences-service;1"].getService( Components.interfaces.nsIPrefService ).getBranch( "extensions.youtube-comment-snob." ),
 
+		__noSuchMethod__ : function ( method, args ) {
+			return COMMENT_SNOB_UTIL.prefs._prefs[method].apply( this, args );
+		},
+		
+		getJSONPref : function (prefName, defaultValue) {
+			var rv = COMMENT_SNOB_UTIL.prefs._prefs.getCharPref(prefName);
+
+			if (!rv) {
+				return defaultValue;
+			}
+			else {
+				return JSON.parse(rv);
+			}
+		},
+
+		setJSONPref : function (prefName, prefVal) {
+			var stringPrefVal = JSON.stringify(prefVal);
+
+			COMMENT_SNOB_UTIL.prefs._prefs.setCharPref(prefName, stringPrefVal);
+		},
+	},
+	
 	get defaultPrefs() {
 		return {
 			"allcaps" : COMMENT_SNOB_UTIL.prefs.getBoolPref("allcaps"),
@@ -33,23 +56,6 @@ var COMMENT_SNOB_UTIL = {
 			"keywords" : COMMENT_SNOB_UTIL.prefs.getCharPref("keywords"),
 			"dictionary" : COMMENT_SNOB_UTIL.prefs.getCharPref("dictionary")
 		};
-	},
-	
-	getJSONPref : function (prefName, defaultValue) {
-		var rv = COMMENT_SNOB_UTIL.prefs.getCharPref(prefName);
-
-		if (!rv) {
-			return defaultValue;
-		}
-		else {
-			return JSON.parse(rv);
-		}
-	},
-	
-	setJSONPref : function (prefName, prefVal) {
-		var stringPrefVal = JSON.stringify(prefVal);
-
-		COMMENT_SNOB_UTIL.prefs.setCharPref(prefName, stringPrefVal);
 	},
 	
 	addRule : function (rule) {
@@ -84,10 +90,10 @@ var COMMENT_SNOB_UTIL = {
 			}
 		}
 		
-		var rules = COMMENT_SNOB_UTIL.getJSONPref("rules", {});
+		var rules = COMMENT_SNOB_UTIL.prefs.getJSONPref("rules", {});
 		rules[rule.id] = rule;
 		
-		COMMENT_SNOB_UTIL.setJSONPref("rules", rules);
+		COMMENT_SNOB_UTIL.prefs.setJSONPref("rules", rules);
 		
 		rv.status = true;
 		rv.rule = rule;
@@ -95,18 +101,18 @@ var COMMENT_SNOB_UTIL = {
 	},
 	
 	removeRule : function (ruleId) {
-		var rules = COMMENT_SNOB_UTIL.getJSONPref("rules", {});
+		var rules = COMMENT_SNOB_UTIL.prefs.getJSONPref("rules", {});
 		
 		if (ruleId in rules) {
 			delete rules[ruleId];
-			COMMENT_SNOB_UTIL.setJSONPref("rules", rules);
+			COMMENT_SNOB_UTIL.prefs.setJSONPref("rules", rules);
 		}
 		
 		COMMENT_SNOB_UTIL.removeRulePrefs(ruleId);
 	},
 	
 	getRulePrefs : function (ruleId) {
-		var prefs = COMMENT_SNOB_UTIL.getJSONPref("rulePrefs", {});
+		var prefs = COMMENT_SNOB_UTIL.prefs.getJSONPref("rulePrefs", {});
 		
 		if (!(ruleId in prefs)) {
 			return COMMENT_SNOB_UTIL.defaultPrefs;
@@ -117,11 +123,11 @@ var COMMENT_SNOB_UTIL = {
 	},
 	
 	removeRulePrefs : function (ruleId) {
-		var prefs = COMMENT_SNOB_UTIL.getJSONPref("rulePrefs", {});
+		var prefs = COMMENT_SNOB_UTIL.prefs.getJSONPref("rulePrefs", {});
 		
 		if (ruleId in prefs) {
 			delete prefs[ruleId];
-			COMMENT_SNOB_UTIL.setJSONPref("rulePrefs", prefs);
+			COMMENT_SNOB_UTIL.prefs.setJSONPref("rulePrefs", prefs);
 		}
 	},
 	

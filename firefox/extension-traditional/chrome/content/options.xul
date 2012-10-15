@@ -142,7 +142,7 @@
 						$( '<description/>' ).text( COMMENT_SNOB.strings.getString( 'label_updating' ) )
 					).show();
 
-					var rules = COMMENT_SNOB_UTIL.getJSONPref( "rules", {} );
+					var rules = COMMENT_SNOB_UTIL.prefs.getJSONPref( "rules", {} );
 
 					if ( COMMENT_SNOB_OPTIONS.currentRuleID in rules ) {
 						var currentRule = rules[ COMMENT_SNOB_OPTIONS.currentRuleID ];

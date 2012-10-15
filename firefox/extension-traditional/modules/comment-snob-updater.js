@@ -49,7 +49,7 @@ var COMMENT_SNOB_UPDATER = {
 		COMMENT_SNOB_UPDATER.clearTimeout( COMMENT_SNOB_UPDATER.updateTimer );
 		COMMENT_SNOB_UPDATER.updateTimer = COMMENT_SNOB_UPDATER.setTimeout(COMMENT_SNOB_UPDATER.updateRules, 1000 * 60 * 60 * 24 * 3);
 		
-		var rules = COMMENT_SNOB_UTIL.getJSONPref("rules", {});
+		var rules = COMMENT_SNOB_UTIL.prefs.getJSONPref("rules", {});
 		
 		for ( var ruleId in rules ) {
 			if ( "updateURL" in rules[ruleId] ) {

@@ -8,7 +8,7 @@ var COMMENT_SNOB_OPTIONS = {
 	populateRuleList : function () {
 		$( "#navbar-container label.user-rule" ).remove();
 	
-		var rules = COMMENT_SNOB_UTIL.getJSONPref("rules", {});
+		var rules = COMMENT_SNOB_UTIL.prefs.getJSONPref("rules", {});
 	
 		for (var i in rules) {
 			var option = $( '<label/>' );
@@ -32,7 +32,7 @@ var COMMENT_SNOB_OPTIONS = {
 	},
 
 	showRuleSettings : function ( ruleId ) {
-		var prefs = COMMENT_SNOB_UTIL.getJSONPref("rulePrefs", {});
+		var prefs = COMMENT_SNOB_UTIL.prefs.getJSONPref("rulePrefs", {});
 	
 		var customPrefs = false;
 	
@@ -127,10 +127,10 @@ var COMMENT_SNOB_OPTIONS = {
 				prefObject[$(this).attr("pref")] = $(this).val();
 			});
 
-			var prefs = COMMENT_SNOB_UTIL.getJSONPref("rulePrefs", {});
+			var prefs = COMMENT_SNOB_UTIL.prefs.getJSONPref("rulePrefs", {});
 			prefs[COMMENT_SNOB_OPTIONS.currentRuleID] = prefObject;
 
-			COMMENT_SNOB_UTIL.setJSONPref("rulePrefs", prefs);
+			COMMENT_SNOB_UTIL.prefs.setJSONPref("rulePrefs", prefs);
 		}
 	},
 
