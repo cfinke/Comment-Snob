@@ -73,8 +73,7 @@ var COMMENT_SNOB_OPTIONS = {
 	
 		if (ruleId) {
 			COMMENT_SNOB_OPTIONS.currentRuleID = ruleId;
-			$("#rule-management").show();
-			$("#default-preferences").show();
+			$( "#rule-management, #default-preferences, #edit-rule" ).show();
 		
 			if (!customPrefs) {
 				$("#use-default").each(function () { this.checked = true; });
@@ -82,12 +81,19 @@ var COMMENT_SNOB_OPTIONS = {
 			else {
 				$("#use-default").each(function () { this.checked = false; });
 			}
+			
+			var rules = COMMENT_SNOB_UTIL.prefs.getJSONPref( "rules", {} );
+			var rule = rules[ ruleId ];
+			
+			if ( "updateURL" in rule )
+				$( '#update' ).show();
+			else
+				$( '#update' ).hide();
 		}
 		else {
 			// Show the default filtering rules.
 			COMMENT_SNOB_OPTIONS.currentRuleID = null;
-			$("#rule-management").hide();
-			$("#default-preferences").hide();
+			$( "#rule-management, #default-preferences, #edit-rule" ).hide();
 		}
 	
 		$( '#update-progress' ).text( '' );

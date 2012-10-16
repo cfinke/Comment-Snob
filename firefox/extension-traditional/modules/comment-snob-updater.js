@@ -69,6 +69,13 @@ var COMMENT_SNOB_UPDATER = {
 	 * @param function callback
 	 */
 	updateRule : function ( rule, callback ) {
+		if ( ! ( "updateURL" in rule ) ) {
+			if ( callback )
+				callback( { status : false } );
+			
+			return;
+		}
+		
 		var req = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance(Components.interfaces.nsIXMLHttpRequest);
 		req.open( "GET", rule.updateURL, true );
 		

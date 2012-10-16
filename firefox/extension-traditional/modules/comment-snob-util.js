@@ -69,13 +69,13 @@ var COMMENT_SNOB_UTIL = {
 
 		if ( typeof rule == 'object' )
 			rule = JSON.stringify( rule );
-
-		rule = COMMENT_SNOB_MINIFY( rule );
 		
 		if ( ! rule ) {
 			rv.msg = 'empty_rule';
 			return rv;
 		}
+		
+		rule = COMMENT_SNOB_MINIFY( rule );
 		
 		try {
 			rule = JSON.parse( rule );

@@ -33,3 +33,4 @@
 <!ENTITY comment_snob.action_add "Add a new rule">
 <!ENTITY comment_snob.new_rule_header "Add a New Rule">
 <!ENTITY comment_snob.reinstall_youtube "Reinstall the default YouTube rule">
+<!ENTITY comment_snob.edit_rule "Edit this rule">

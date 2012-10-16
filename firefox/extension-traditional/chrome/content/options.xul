@@ -40,6 +40,7 @@
 									<hbox>
 										<button id="update" label="&comment_snob.action_update;" />
 										<button id="remove" label="&comment_snob.action_remove;" />
+										<button id="edit-rule" label="&comment_snob.edit_rule;" />
 										<spacer flex="1" />
 									</hbox>
 									<spacer flex="1" />
@@ -49,7 +50,7 @@
 							</hbox>
 						</hbox>
 
-						<hbox class="section" flex="1">
+						<hbox class="section" flex="1" style="overflow: auto;">
 							<vbox flex="1">
 								<label class="subheader">&comment_snob.filteringPreferences;</label>
 							</vbox>
@@ -202,8 +203,15 @@
 
 					var rv = COMMENT_SNOB_UTIL.addRule( rule );
 
-					if (!rv.status) {
-						$("#rule-error").text(rv.msg).show();
+					if ( ! rv.status ) {
+						if ( 'msgArgs' in rv ) {
+							$("#rule-error").text( COMMENT_SNOB.strings.getFormattedString( rv.msg, rv.msgArgs ) );
+						}
+						else {
+							$("#rule-error").text( COMMENT_SNOB.strings.getString( rv.msg ) );
+						}
+						
+						$( '#rule-error' ).show();
 					}
 					else {
 						COMMENT_SNOB_OPTIONS.populateRuleList();
@@ -241,6 +249,13 @@
 				$("#use-default").on( 'click.comment-snob', function () {
 					COMMENT_SNOB_OPTIONS.useDefaultChange();
 				});
+				
+				$( '#edit-rule' ).on( 'click.comment-snob', function () {
+					var rules = COMMENT_SNOB_UTIL.prefs.getJSONPref( "rules", {} );
+					var rule = rules[ COMMENT_SNOB_OPTIONS.currentRuleID ];
+					$( '#add' ).click();
+					$( '#add-rule' ).val( JSON.stringify( rule, null, 2 ) );
+				} );
 
 				COMMENT_SNOB_OPTIONS.populateRuleList();
 
