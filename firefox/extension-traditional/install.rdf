@@ -3,7 +3,7 @@
 	<Description about="urn:mozilla:install-manifest">
 		<em:id>youtube-comment-snob@efinke.com</em:id>
 		<em:name>Comment Snob</em:name>
-		<em:version>4a1</em:version>
+		<em:version>4</em:version>
 		<em:type>2</em:type>
 		<em:description>Filters out undesirable comments from the Web.</em:description>
 		<em:creator>Christopher Finke</em:creator>
