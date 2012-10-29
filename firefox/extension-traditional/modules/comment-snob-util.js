@@ -4,7 +4,7 @@ var COMMENT_SNOB_UTIL = {
 	youtubeRule : {
 		"id": "youtube@chrisfinke.com",
 		"label": "YouTube",
-		"url": "^http://www\\.youtube\\.com/.*$",
+		"url": "^https?://www\\.youtube\\.com/.*$",
 		"allCommentsSelector": "#comments-view",
 		"commentContainerSelector": "li.comment",
 		"commentTextSelector": "div.comment-text",
