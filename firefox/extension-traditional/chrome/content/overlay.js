@@ -485,7 +485,7 @@ var COMMENT_SNOB = {
 			var el = COMMENT_SNOB.$("<" + theRule.statusElementTag+"/>", page);
 		}
 		else {
-			var ele = COMMENT_SNOB.$("<span/>", page);
+			var el = COMMENT_SNOB.$("<span/>", page);
 		}
 
 		for (var attr in theRule.statusElementAttributes) {
