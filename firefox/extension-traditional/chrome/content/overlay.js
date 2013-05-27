@@ -355,7 +355,10 @@ var COMMENT_SNOB = {
 					var id = "comment-snob-" + idx;
 
 					if ("commentHideSelector" in theRule) {
-						var commentHide = $this.find(theRule.commentHideSelector);
+						if (theRule.commentHideSelector)
+							var commentHide = $this.find(theRule.commentHideSelector);
+						else
+							var commentHide = $this;
 					}
 					else {
 						if ("commentTextSelector" in theRule) {
