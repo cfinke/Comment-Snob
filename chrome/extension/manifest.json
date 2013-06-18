@@ -16,14 +16,13 @@
 			"jquery-1.7.2.min.js",
 			"lib/typo/typo.js",
 			"comment-snob.js",
-			"minify.json.js",
 			"background.js"
 		]
 	},
 	"content_scripts": [
 		{
 			"matches": [ "http://*/*", "https://*/*" ],
-			"js": [ "jquery-1.7.2.min.js", "minify.json.js", "lib/typo/typo.js", "content.js" ],
+			"js": [ "jquery-1.7.2.min.js", "lib/typo/typo.js", "content.js" ],
 			"css": [ "skin/install.css" ]
 		}
 	],

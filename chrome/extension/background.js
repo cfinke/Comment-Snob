@@ -45,8 +45,6 @@ chrome.extension.onRequest.addListener(function (request, sender, sendResponse) 
 		}
 		else if ("href" in request.rule) {
 			function handleText(text) {
-				var text = JSON.minify(text);
-				
 				try {
 					var json = JSON.parse(text);
 				} catch (e) {

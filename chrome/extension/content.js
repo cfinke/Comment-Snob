@@ -323,7 +323,7 @@ function createPlaceholder(id, reason) {
 
 function checkForRules() {
 	if (document.location.href.match(/\.snob(\?.*)?$/i)) {
-		var rule = JSON.minify($("body").text());
+		var rule = $("body").text();
 		
 		try {
 			var jsonRule = JSON.parse(rule);
