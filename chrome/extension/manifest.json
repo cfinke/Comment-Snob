@@ -1,7 +1,8 @@
 {
 	"name": "__MSG_extName__",
 	"description": "__MSG_extDescription__",
-	"version": "6",
+	"version": "7",
+	"manifest_version": 2,
 	"icons" : {
 		"16": "skin/icon-16.png",
 		"48": "skin/icon-48.png",
@@ -10,7 +11,15 @@
 	"homepage_url": "http://www.chrisfinke.com/addons/comment-snob/",
 	"default_locale": "en_US",
 	"permissions": [ "http://*/*", "https://*/*", "tabs" ],
-	"background_page": "background.html",
+	"background" : {
+		"scripts" : [
+			"jquery-1.7.2.min.js",
+			"lib/typo/typo.js",
+			"comment-snob.js",
+			"minify.json.js",
+			"background.js"
+		]
+	},
 	"content_scripts": [
 		{
 			"matches": [ "http://*/*", "https://*/*" ],
